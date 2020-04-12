@@ -1,0 +1,108 @@
+query Nodes($map: Float!) {
+  nodes(map: $map) {
+    id
+    mapId
+    system {
+      id
+      regionId
+      constellationId
+      systemName
+      class
+      effect
+      trueSec
+      statics {
+        id
+        name
+        sourceClasses
+        targetClass
+        lifetime
+        maxMass
+        massRegen
+        maxOnePass
+        scanStrength
+      }
+    }
+  }
+}
+
+query Connections($map: Float!) {
+  connections(map: $map) {
+    id
+    mapId
+    source
+    target
+    createdAt
+    updatedAt
+  }
+}
+
+query Updates($map: Float!) {
+  connections: connections(map: $map) {
+    id
+    mapId
+    source
+    target
+    createdAt
+    updatedAt
+  }
+
+  nodes: nodes(map: $map) {
+    id
+    mapId
+    system {
+      id
+      regionId
+      constellationId
+      systemName
+      class
+      effect
+      trueSec
+      statics {
+        id
+        name
+        sourceClasses
+        targetClass
+        lifetime
+        maxMass
+        massRegen
+        maxOnePass
+        scanStrength
+      }
+    }
+  }
+}
+
+mutation AddConnection($map: Float!, $source: String!, $target: String!) {
+  addConnection(map: $map, source: $source, target: $target) {
+    id
+  }
+}
+
+mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
+  removeConnection(map: $map, source: $source, target: $target) {
+    id
+  }
+}
+
+subscription WatchNodes($map: Float!) {
+  nodeAdded(map: $map) {
+    id
+    mapId
+    system {
+      id
+      systemName
+      class
+      trueSec
+      statics {
+        id
+        name
+        sourceClasses
+        targetClass
+        lifetime
+        maxMass
+        massRegen
+        maxOnePass
+      }
+    }
+  }
+}
