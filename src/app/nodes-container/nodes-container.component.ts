@@ -1,10 +1,14 @@
-import { Component, OnInit, Input, ViewContainerRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  ViewContainerRef,
+  ViewChild,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { NodeService } from '../node.service';
-import { Store,  } from '@ngrx/store';
-import { addNode, deleteNode } from '../store/actions/node.action';
-import { Node } from '../graphql';
-
-
+import { Node, Connection } from '../graphql';
 
 @Component({
   selector: 'nodes-container',
@@ -14,31 +18,44 @@ import { Node } from '../graphql';
 export class NodesContainerComponent implements OnInit, OnChanges {
   @Input() nodes: Node[];
 
-  @Input() connections = [];
+  @Input() connections: Connection[];
 
-  @ViewChild('nodes', { read: ViewContainerRef, static: true }) viewContainerRef: ViewContainerRef;
+  @ViewChild('nodes', { read: ViewContainerRef, static: true })
+  viewContainerRef: ViewContainerRef;
 
-
-  constructor(private nodeService: NodeService) {
-  }
+  constructor(private nodeService: NodeService) {}
 
   ngOnInit() {
     this.nodeService.setRootViewContainerRef(this.viewContainerRef);
-
-    this.nodes.forEach(node => {
-      this.nodeService.addDynamicNode(node);
-    });
-
-    setTimeout(() => {
-      this.connections.forEach(connection => {
-        this.nodeService.addConnection(connection);
-      });
-    })
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.nodes.currentValue.length <= 3) {
-      this.nodes.forEach(node => this.nodeService.addDynamicNode(node));
+    for (let key in changes) {
+      const prev: (Node | Connection)[] = changes[key].previousValue;
+      const curr: (Node | Connection)[] = changes[key].currentValue;
+      if (prev) {
+        const toDelete = prev.filter(
+          ({ id }) => curr.map((val) => val.id).indexOf(id) === -1
+        );
+        const toAdd = curr.filter(
+          ({ id }) => prev.map((val) => val.id).indexOf(id) === -1
+        );
+
+        toAdd.forEach((val) => {
+          if (key === 'nodes') {
+            this.nodeService.addDynamicNode(val as Node);
+          } else {
+            this.nodeService.addConnection(val as Connection);
+          }
+        });
+        toDelete.forEach((val) => {
+          if (key === 'nodes') {
+            this.nodeService.removeDynamicNode(val as Node);
+          } else {
+            this.nodeService.removeConnection(val as Connection);
+          }
+        });
+      }
     }
   }
 }

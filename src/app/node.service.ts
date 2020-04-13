@@ -1,14 +1,15 @@
-import { ComponentFactoryResolver, Injectable } from '@angular/core';
+import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 
 import { NodeComponent } from './node/node.component';
-import { Node } from './graphql';
+import { Node, Connection } from './graphql';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NodeService {
-  private rootViewContainer: any;
+  private rootViewContainer: ViewContainerRef;
+  private nodes: string[] = [];
 
   jsPlumbInstance = jsPlumb.getInstance();
 
@@ -23,14 +24,27 @@ export class NodeService {
     const component = factory.create(this.rootViewContainer.parentInjector);
     (<any>component.instance).node = node;
     (<any>component.instance).jsPlumbInstance = this.jsPlumbInstance;
+    this.nodes.push(node.id);
     this.rootViewContainer.insert(component.hostView);
   }
 
-  addConnection(connection) {
-    this.jsPlumbInstance.connect({ uuids: connection.uuids });
+  public removeDynamicNode(node: Node) {
+    // @ts-ignore
+    this.jsPlumbInstance.selectEndpoints({
+      element: node.id,
+    }).each(end => this.jsPlumbInstance.deleteEndpoint(end));
+    this.rootViewContainer.remove(this.nodes.indexOf(node.id));
+    this.nodes.splice(this.nodes.indexOf(node.id), 1);
   }
 
-  public clear() {
-    this.rootViewContainer.clear();
+  addConnection(connection: Connection) {
+    this.jsPlumbInstance.connect({ uuids: [connection.source + '_bottom', connection.target + '_top'] });
+  }
+
+  removeConnection(connection: Connection) {
+    this.jsPlumbInstance.select({
+      source: connection.source,
+      target: connection.target,
+    }).each(conn => this.jsPlumbInstance.deleteConnection(conn));
   }
 }

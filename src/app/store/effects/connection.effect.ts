@@ -5,15 +5,15 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import { AppService } from '../../app.service';
 
 @Injectable()
-export class NodeEffects {
+export class ConnectionEffects {
   loadNodes$ = createEffect(() =>
     this.actions$.pipe(
-      ofType('[Node Page] Load Nodes'),
+      ofType('[Connection Page] Load Connections'),
       mergeMap(() =>
-        this.service.getNodes().pipe(
-          map((nodes) => ({
-            type: '[Node] Load Nodes',
-            nodes: nodes,
+        this.service.getConnections().pipe(
+          map((connections) => ({
+            type: '[Connection] Load Connections',
+            connections: connections,
           })),
           catchError(() => EMPTY)
         )

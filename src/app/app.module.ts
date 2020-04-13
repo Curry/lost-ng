@@ -8,9 +8,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { NodeComponent } from './node/node.component';
 import { NodesContainerComponent } from './nodes-container/nodes-container.component';
 import { StoreModule } from '@ngrx/store';
-import * as fromNode from './store/reducers/node.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { NodeEffects } from './store/effects/node.effects';
+import { ConnectionEffects } from './store/effects/connection.effect';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { reducers } from './store';
 
 @NgModule({
   imports: [
@@ -18,8 +20,10 @@ import { NodeEffects } from './store/effects/node.effects';
     AppRoutingModule,
     GraphQLModule,
     HttpClientModule,
-    StoreModule.forRoot({ nodes: fromNode.reducer }),
-    EffectsModule.forRoot([NodeEffects]),
+    DragDropModule,
+    StoreModule.forRoot({}),
+    StoreModule.forFeature('app', reducers),
+    EffectsModule.forRoot([NodeEffects, ConnectionEffects]),
   ],
   declarations: [AppComponent, NodeComponent, NodesContainerComponent],
   entryComponents: [NodeComponent],
