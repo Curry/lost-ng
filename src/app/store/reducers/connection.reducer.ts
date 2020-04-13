@@ -13,7 +13,7 @@ const connectionReducer = createReducer(
   initialState,
   on(ConnectionActions.addConnection, (state, { connection }) => adapter.addOne(connection, state)),
   on(ConnectionActions.resetConnections, (state) => adapter.removeAll(state)),
-  on(ConnectionActions.loadConnections, (state, { connections }) => adapter.addMany(connections, state)),
+  on(ConnectionActions.loadConnections, (state, { connections }) => adapter.setAll(connections, state)),
 )
 
 export function reducer(state: ConnectionState | undefined, action: Action) {

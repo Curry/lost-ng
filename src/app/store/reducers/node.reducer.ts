@@ -13,7 +13,7 @@ const nodeReducer = createReducer(
   initialState,
   on(NodeActions.resetNodes, (state) => adapter.removeAll(state)),
   on(NodeActions.addNode, (state, { node }) => adapter.addOne(node, state)),
-  on(NodeActions.loadNodes, (state, { nodes }) => adapter.addMany(nodes, state)),
+  on(NodeActions.loadNodes, (state, { nodes }) => adapter.setAll(nodes, state)),
 )
 
 export function reducer(state: NodeState | undefined, action: Action) {
