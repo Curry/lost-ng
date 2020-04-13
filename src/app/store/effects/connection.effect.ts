@@ -12,7 +12,9 @@ export class ConnectionEffects {
       ofType(connectionActions.getConnections),
       mergeMap(() =>
         this.service.getConnections().pipe(
-          map((connections) => connectionActions.loadConnections({ connections: connections })),
+          map((connections) =>
+            connectionActions.loadConnections({ connections: connections })
+          ),
           catchError(() => EMPTY)
         )
       )

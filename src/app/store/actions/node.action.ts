@@ -16,4 +16,7 @@ export const loadNodes = createAction(
 export const deleteNode = createAction(deleteNodeType, props<{ node: Node }>());
 export const resetNodes = createAction(resetNodesType);
 export const getNodes = createAction(getNodesType);
-export const moveNode = createAction(moveNodeType, props<{ id: string, x: number, y: number }>());
+export const moveNode = createAction(
+  moveNodeType,
+  props<{ id: string; x: number; y: number }>()
+);

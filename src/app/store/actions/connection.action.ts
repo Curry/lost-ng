@@ -7,7 +7,10 @@ export const deleteConnectionType = '[Connection] Delete Connection';
 export const resetConnectionsType = '[Connection] Reset Connections';
 export const getConnectionsType = '[Connection] Get Connections';
 
-export const addConnection = createAction(addConnectionType, props<{ connection: Connection }>());
+export const addConnection = createAction(
+  addConnectionType,
+  props<{ connection: Connection }>()
+);
 export const loadConnections = createAction(
   loadConnectionsType,
   props<{ connections: Connection[] }>()

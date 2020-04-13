@@ -9,7 +9,7 @@ import * as fromApp from './store';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, AfterViewInit {
   title = 'lost-ng';
@@ -18,7 +18,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   constructor(private store: Store<fromApp.AppState>) {
     this.nodes$ = store.select(fromApp.getAllNodes);
-    this.connections$ = store.select(fromApp.getAllConnections)
+    this.connections$ = store.select(fromApp.getAllConnections);
   }
 
   ngOnInit() {
@@ -32,7 +32,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   addNode() {
-    const node = { id: [Math.random().toString(16).slice(2, 8)].toString(), system: { systemName: '1'} } as Node;
+    const node = {
+      id: [Math.random().toString(16).slice(2, 8)].toString(),
+      system: { systemName: '1' },
+    } as Node;
     this.store.dispatch(nodeActions.addNode({ node: node }));
   }
 

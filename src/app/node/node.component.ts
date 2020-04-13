@@ -5,7 +5,7 @@ import { jsPlumbInstance } from 'jsplumb';
 @Component({
   selector: 'node',
   templateUrl: './node.component.html',
-  styleUrls: ['./node.component.scss']
+  styleUrls: ['./node.component.scss'],
 })
 export class NodeComponent implements AfterViewInit {
   @Input() node: Node;
@@ -16,7 +16,7 @@ export class NodeComponent implements AfterViewInit {
     const exampleDropOptions = {
       tolerance: 'touch',
       hoverClass: 'dropHover',
-      activeClass: 'dragActive'
+      activeClass: 'dragActive',
     };
     let Endpoint1 = {
       endpoint: ['Dot', { radius: 6 }],
@@ -27,7 +27,7 @@ export class NodeComponent implements AfterViewInit {
       connector: ['Bezier', { curviness: 50 }],
       maxConnections: 30,
       isTarget: false,
-      dropOptions: exampleDropOptions
+      dropOptions: exampleDropOptions,
     };
     let Endpoint2 = {
       endpoint: ['Dot', { radius: 6 }],
@@ -36,16 +36,23 @@ export class NodeComponent implements AfterViewInit {
       scope: 'jsPlumb_DefaultScope',
       maxConnections: 10,
       isTarget: true,
-      dropOptions: exampleDropOptions
+      dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
     // @ts-ignore
-    this.jsPlumbInstance.addEndpoint(id, { anchor: 'Right', uuid: id + '_bottom' }, Endpoint1);
+    this.jsPlumbInstance.addEndpoint(
+      id,
+      { anchor: 'Right', uuid: id + '_bottom' },
+      Endpoint1
+    );
     // @ts-ignore
-    this.jsPlumbInstance.addEndpoint(id, { anchor: 'Left', uuid: id + '_top' }, Endpoint2);
+    this.jsPlumbInstance.addEndpoint(
+      id,
+      { anchor: 'Left', uuid: id + '_top' },
+      Endpoint2
+    );
     this.jsPlumbInstance.draggable(id, {
       stop: (val) => console.log(val.pos),
     });
   }
-
 }

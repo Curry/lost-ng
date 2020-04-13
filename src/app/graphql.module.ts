@@ -16,7 +16,7 @@ import { WebSocketLink } from 'apollo-link-ws';
           cache: new InMemoryCache(),
           link: split(
             ({ query }) =>
-              (getMainDefinition(query))['operation'] === 'subscription',
+              getMainDefinition(query)['operation'] === 'subscription',
             new WebSocketLink({
               uri: 'ws://localhost:3000/graphql',
               options: {
@@ -25,7 +25,7 @@ import { WebSocketLink } from 'apollo-link-ws';
             }),
             httpLink.create({
               uri: 'http://localhost:3000/graphql',
-            }),
+            })
           ),
         };
       },

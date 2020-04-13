@@ -26,24 +26,11 @@ export const getNodeState = createSelector(
 export const getConnectionState = createSelector(
   getAppState,
   (state: AppState) => state.connections
-)
-
-export const getNodeEntities = createSelector(
-  getNodeState,
-  fromNode.selectEntities
 );
 
-export const getAllNodes = createSelector(
-  getNodeState,
-  fromNode.selectAll
-)
-
-export const getConnectionEntities = createSelector(
-  getConnectionState,
-  fromConnection.selectEntities
-)
+export const getAllNodes = createSelector(getNodeState, fromNode.selectAll);
 
 export const getAllConnections = createSelector(
   getConnectionState,
   fromConnection.selectAll
-)
+);
