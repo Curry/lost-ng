@@ -33,8 +33,8 @@ export class NodeService {
   }
 
   public removeDynamicNode(node: Node) {
-    // @ts-ignore
     this.jsPlumbInstance
+    // @ts-ignore
       .selectEndpoints({
         element: node.id,
       })

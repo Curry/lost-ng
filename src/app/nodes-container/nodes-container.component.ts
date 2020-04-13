@@ -23,7 +23,9 @@ export class NodesContainerComponent implements OnInit, OnChanges {
   @ViewChild('nodes', { read: ViewContainerRef, static: true })
   viewContainerRef: ViewContainerRef;
 
-  constructor(private nodeService: NodeService) {}
+  constructor(
+    private nodeService: NodeService,
+  ) {}
 
   ngOnInit() {
     this.nodeService.setRootViewContainerRef(this.viewContainerRef);

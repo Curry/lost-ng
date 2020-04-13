@@ -23,12 +23,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.store.dispatch(nodeActions.getNodes());
-    console.log('1', new Date().getMilliseconds());
   }
 
   ngAfterViewInit() {
     this.store.dispatch(connectionActions.getConnections());
-    console.log('2', new Date().getMilliseconds());
   }
 
   addNode() {

@@ -39,15 +39,15 @@ export class NodeComponent implements AfterViewInit {
       dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
-    // @ts-ignore
     this.jsPlumbInstance.addEndpoint(
       id,
+      // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
       Endpoint1
     );
-    // @ts-ignore
     this.jsPlumbInstance.addEndpoint(
       id,
+      // @ts-ignore
       { anchor: 'Left', uuid: id + '_top' },
       Endpoint2
     );
