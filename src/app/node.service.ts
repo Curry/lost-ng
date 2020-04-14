@@ -7,6 +7,9 @@ import { jsPlumb } from 'jsplumb';
 
 import { NodeComponent } from './node/node.component';
 import { Node, Connection } from './graphql';
+import * as fromConnection from './store/actions/connection.action';
+import { Store } from '@ngrx/store';
+import { AppState } from './store';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +20,16 @@ export class NodeService {
 
   jsPlumbInstance = jsPlumb.getInstance();
 
-  constructor(private factoryResolver: ComponentFactoryResolver) {}
+  constructor(private factoryResolver: ComponentFactoryResolver, private store: Store<AppState>) {
+    this.jsPlumbInstance.bind("connection", (info, event) => {
+      const { sourceId, targetId } = info;
+      this.store.dispatch(fromConnection.createConnection({
+          mapId: 1,
+          source: sourceId,
+          target: targetId,
+      }));
+    });
+  }
 
   public setRootViewContainerRef(viewContainerRef) {
     this.rootViewContainer = viewContainerRef;

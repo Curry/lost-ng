@@ -19,5 +19,16 @@ export class NodeEffects {
     )
   );
 
+  moveNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.moveNode),
+        mergeMap(val =>
+          this.service.moveNode(val.id, val.posX, val.posY)
+        )
+      ),
+      { dispatch: false }
+  );
+
   constructor(private actions$: Actions, private service: AppService) {}
 }

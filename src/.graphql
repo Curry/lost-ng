@@ -2,6 +2,9 @@ query Nodes($map: Float!) {
   nodes(map: $map) {
     id
     mapId
+    alias
+    posX
+    posY
     system {
       id
       regionId
@@ -75,11 +78,22 @@ query Updates($map: Float!) {
 mutation AddConnection($map: Float!, $source: String!, $target: String!) {
   addConnection(map: $map, source: $source, target: $target) {
     id
+    mapId
+    source
+    target
+    createdAt
+    updatedAt
   }
 }
 
 mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
   removeConnection(map: $map, source: $source, target: $target) {
+    id
+  }
+}
+
+mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {
+  moveNode(id: $id, posX: $posX, posY: $posY) {
     id
   }
 }

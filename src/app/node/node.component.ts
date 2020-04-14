@@ -1,6 +1,9 @@
 import { Component, Input, AfterViewInit } from '@angular/core';
 import { Node } from '../graphql';
 import { jsPlumbInstance } from 'jsplumb';
+import { Store } from '@ngrx/store';
+import * as NodeActions from '../store/actions/node.action';
+import { AppState } from '../store';
 
 @Component({
   selector: 'node',
@@ -11,6 +14,8 @@ export class NodeComponent implements AfterViewInit {
   @Input() node: Node;
 
   @Input() jsPlumbInstance: jsPlumbInstance;
+
+  constructor(private store: Store<AppState>) {}
 
   ngAfterViewInit() {
     const exampleDropOptions = {
@@ -39,7 +44,7 @@ export class NodeComponent implements AfterViewInit {
       dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
-    this.jsPlumbInstance.addEndpoint(
+    const e1 = this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
@@ -52,7 +57,11 @@ export class NodeComponent implements AfterViewInit {
       Endpoint2
     );
     this.jsPlumbInstance.draggable(id, {
-      stop: (val) => console.log(val.pos),
+      stop: (val) => this.store.dispatch(NodeActions.moveNode({
+        id: id,
+        posX: val.pos[0],
+        posY: val.pos[1]
+      })),
     });
   }
 }

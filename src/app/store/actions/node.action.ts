@@ -18,5 +18,5 @@ export const resetNodes = createAction(resetNodesType);
 export const getNodes = createAction(getNodesType);
 export const moveNode = createAction(
   moveNodeType,
-  props<{ id: string; x: number; y: number }>()
+  props<{ id: string; posX: number; posY: number }>()
 );

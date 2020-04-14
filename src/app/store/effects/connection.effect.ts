@@ -24,6 +24,21 @@ export class ConnectionEffects {
     )
   );
 
+  createConnection$ = createEffect(() =>
+    this.actions$.pipe(
+        ofType(connectionActions.createConnection),
+        mergeMap(({ mapId, source, target }) =>
+          this.service.createConnection(mapId, source, target).pipe(
+            map(connection =>
+              connectionActions.addConnection({
+                connection: connection
+              })
+            )
+          )
+        )
+    )
+  );
+
   constructor(
     private actions$: Actions,
     private service: AppService,

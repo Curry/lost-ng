@@ -13,8 +13,10 @@ export const initialState: ConnectionState = adapter.getInitialState();
 
 const connectionReducer = createReducer(
   initialState,
-  on(ConnectionActions.addConnection, (state, { connection }) =>
-    adapter.addOne(connection, state)
+  on(ConnectionActions.addConnection, (state, { connection }) => {
+    console.log('potato')
+    return adapter.addOne(connection, state);
+  }
   ),
   on(ConnectionActions.resetConnections, (state) => adapter.removeAll(state)),
   on(ConnectionActions.loadConnections, (state, { connections }) =>
