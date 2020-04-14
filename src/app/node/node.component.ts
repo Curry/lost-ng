@@ -1,14 +1,16 @@
-import { Component, Input, AfterViewInit } from '@angular/core';
-import { Node } from '../graphql';
-import { jsPlumbInstance } from 'jsplumb';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as NodeActions from '../store/actions/node.action';
+import { jsPlumbInstance } from 'jsplumb';
+import { Node } from '../graphql';
 import { AppState } from '../store';
+import * as NodeActions from '../store/actions/node.action';
 
 @Component({
+  // tslint:disable-next-line:component-selector
   selector: 'node',
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeComponent implements AfterViewInit {
   @Input() node: Node;
@@ -17,13 +19,13 @@ export class NodeComponent implements AfterViewInit {
 
   constructor(private store: Store<AppState>) {}
 
-  ngAfterViewInit() {
+  createEndpoints = () => {
     const exampleDropOptions = {
       tolerance: 'touch',
       hoverClass: 'dropHover',
       activeClass: 'dragActive',
     };
-    let Endpoint1 = {
+    const Endpoint1 = {
       endpoint: ['Dot', { radius: 6 }],
       paintStyle: { fill: '#3f51b5' },
       isSource: true,
@@ -34,7 +36,7 @@ export class NodeComponent implements AfterViewInit {
       isTarget: false,
       dropOptions: exampleDropOptions,
     };
-    let Endpoint2 = {
+    const Endpoint2 = {
       endpoint: ['Dot', { radius: 6 }],
       paintStyle: { fill: '#ff4081' },
       isSource: false,
@@ -44,7 +46,7 @@ export class NodeComponent implements AfterViewInit {
       dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
-    const e1 = this.jsPlumbInstance.addEndpoint(
+    this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
@@ -56,12 +58,20 @@ export class NodeComponent implements AfterViewInit {
       { anchor: 'Left', uuid: id + '_top' },
       Endpoint2
     );
+  }
+
+  ngAfterViewInit() {
+    const { id } = this.node;
+    this.createEndpoints();
     this.jsPlumbInstance.draggable(id, {
-      stop: (val) => this.store.dispatch(NodeActions.moveNode({
-        id: id,
-        posX: val.pos[0],
-        posY: val.pos[1]
-      })),
+      stop: (val) =>
+        this.store.dispatch(
+          NodeActions.startMoveNode({
+            id,
+            posX: val.pos[0],
+            posY: val.pos[1],
+          })
+        ),
     });
   }
 }

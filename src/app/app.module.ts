@@ -21,7 +21,7 @@ import { reducers } from './store';
     GraphQLModule,
     HttpClientModule,
     DragDropModule,
-    StoreModule.forRoot({}),
+    StoreModule.forRoot({}, {}),
     StoreModule.forFeature('app', reducers),
     EffectsModule.forRoot([NodeEffects, ConnectionEffects]),
   ],

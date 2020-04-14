@@ -4,61 +4,68 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
-
 import { NodeComponent } from './node/node.component';
 import { Node, Connection } from './graphql';
-import * as fromConnection from './store/actions/connection.action';
-import { Store } from '@ngrx/store';
-import { AppState } from './store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NodeService {
   private rootViewContainer: ViewContainerRef;
-  private nodes: string[] = [];
 
   jsPlumbInstance = jsPlumb.getInstance();
 
-  constructor(private factoryResolver: ComponentFactoryResolver, private store: Store<AppState>) {
-    this.jsPlumbInstance.bind("connection", (info, event) => {
-      const { sourceId, targetId } = info;
-      this.store.dispatch(fromConnection.createConnection({
-          mapId: 1,
-          source: sourceId,
-          target: targetId,
-      }));
-    });
-  }
+  constructor(private factoryResolver: ComponentFactoryResolver) {}
 
-  public setRootViewContainerRef(viewContainerRef) {
+  setRootViewContainerRef = (viewContainerRef: ViewContainerRef) => {
     this.rootViewContainer = viewContainerRef;
   }
 
-  public addDynamicNode(node: Node) {
+  resetNodes = () => {
+    this.rootViewContainer.clear();
+    this.jsPlumbInstance.reset(true);
+  }
+
+  resetConnections = () => this.jsPlumbInstance.deleteEveryConnection();
+
+  addNodes = (nodes: Node[]) => {
     const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
-    const component = factory.create(this.rootViewContainer.parentInjector);
-    (<any>component.instance).node = node;
-    (<any>component.instance).jsPlumbInstance = this.jsPlumbInstance;
-    this.nodes.push(node.id);
+    nodes.forEach((node) => {
+      const component = factory.create(this.rootViewContainer.injector);
+      (component.instance as any).node = node;
+      (component.instance as any).jsPlumbInstance = this.jsPlumbInstance;
+      this.rootViewContainer.insert(component.hostView);
+    });
+  }
+
+  addDynamicNode = (node: Node) => {
+    const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
+    const component = factory.create(this.rootViewContainer.injector);
+    (component.instance as any).node = node;
+    (component.instance as any).jsPlumbInstance = this.jsPlumbInstance;
     this.rootViewContainer.insert(component.hostView);
   }
 
-  public removeDynamicNode(node: Node) {
-    this.jsPlumbInstance
-    // @ts-ignore
-      .selectEndpoints({
-        element: node.id,
-      })
-      .each((end) => this.jsPlumbInstance.deleteEndpoint(end));
-    this.rootViewContainer.remove(this.nodes.indexOf(node.id));
-    this.nodes.splice(this.nodes.indexOf(node.id), 1);
+  addConnections = (connections: Connection[]) => {
+    connections.forEach((connection) => {
+      this.jsPlumbInstance.connect({
+        uuids: [connection.source + '_bottom', connection.target + '_top'],
+      });
+    });
   }
 
   addConnection(connection: Connection) {
-    this.jsPlumbInstance.connect({
-      uuids: [connection.source + '_bottom', connection.target + '_top'],
-    });
+    if (
+      this.jsPlumbInstance.select({
+        source: connection.source,
+        target: connection.target,
+        // @ts-ignore
+      }).length === 0
+    ) {
+      this.jsPlumbInstance.connect({
+        uuids: [connection.source + '_bottom', connection.target + '_top'],
+      });
+    }
   }
 
   removeConnection(connection: Connection) {

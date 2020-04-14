@@ -1,16 +1,18 @@
 import {
   Component,
-  OnInit,
   Input,
-  ViewContainerRef,
-  ViewChild,
   OnChanges,
+  OnInit,
   SimpleChanges,
+  ViewChild,
+  ViewContainerRef,
 } from '@angular/core';
+import { timer } from 'rxjs';
+import { Connection, Node } from '../graphql';
 import { NodeService } from '../node.service';
-import { Node, Connection } from '../graphql';
 
 @Component({
+  // tslint:disable-next-line:component-selector
   selector: 'nodes-container',
   templateUrl: './nodes-container.component.html',
   styleUrls: ['./nodes-container.component.scss'],
@@ -23,41 +25,20 @@ export class NodesContainerComponent implements OnInit, OnChanges {
   @ViewChild('nodes', { read: ViewContainerRef, static: true })
   viewContainerRef: ViewContainerRef;
 
-  constructor(
-    private nodeService: NodeService,
-  ) {}
+  constructor(private nodeService: NodeService) {}
 
   ngOnInit() {
     this.nodeService.setRootViewContainerRef(this.viewContainerRef);
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    for (let key in changes) {
-      const prev: (Node | Connection)[] = changes[key].previousValue;
-      const curr: (Node | Connection)[] = changes[key].currentValue;
-      if (prev) {
-        const toDelete = prev.filter(
-          ({ id }) => curr.map((val) => val.id).indexOf(id) === -1
-        );
-        const toAdd = curr.filter(
-          ({ id }) => prev.map((val) => val.id).indexOf(id) === -1
-        );
-
-        toAdd.forEach((val) => {
-          if (key === 'nodes') {
-            this.nodeService.addDynamicNode(val as Node);
-          } else {
-            this.nodeService.addConnection(val as Connection);
-          }
-        });
-        toDelete.forEach((val) => {
-          if (key === 'nodes') {
-            this.nodeService.removeDynamicNode(val as Node);
-          } else {
-            this.nodeService.removeConnection(val as Connection);
-          }
-        });
-      }
+    if (changes.nodes) {
+      this.nodeService.resetNodes();
+      this.nodeService.addNodes(this.nodes);
     }
+    timer().subscribe(() => {
+      this.nodeService.resetConnections();
+      this.nodeService.addConnections(this.connections);
+    });
   }
 }

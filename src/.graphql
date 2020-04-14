@@ -95,6 +95,8 @@ mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
 mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {
   moveNode(id: $id, posX: $posX, posY: $posY) {
     id
+    posX
+    posY
   }
 }
 

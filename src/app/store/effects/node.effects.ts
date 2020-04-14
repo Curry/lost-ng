@@ -12,22 +12,26 @@ export class NodeEffects {
       ofType(nodeActions.getNodes),
       mergeMap(() =>
         this.service.getNodes().pipe(
-          map((nodes) => nodeActions.loadNodes({ nodes: nodes })),
+          map((nodes) => nodeActions.loadNodes({ nodes })),
           catchError(() => EMPTY)
         )
       )
     )
   );
 
-  moveNode$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(nodeActions.moveNode),
-        mergeMap(val =>
-          this.service.moveNode(val.id, val.posX, val.posY)
-        )
-      ),
-      { dispatch: false }
+  moveNode$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(nodeActions.startMoveNode),
+      mergeMap((val) =>
+        this.service
+          .moveNode(val.id, val.posX, val.posY)
+          .pipe(
+            map(({ id, posX, posY }) =>
+              nodeActions.moveNode({ id, posX, posY })
+            )
+          )
+      )
+    )
   );
 
   constructor(private actions$: Actions, private service: AppService) {}
