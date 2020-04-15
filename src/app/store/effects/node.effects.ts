@@ -19,19 +19,31 @@ export class NodeEffects {
     )
   );
 
-  moveNode$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(nodeActions.startMoveNode),
-      mergeMap((val) =>
-        this.service
-          .moveNode(val.id, val.posX, val.posY)
-          .pipe(
-            map(({ id, posX, posY }) =>
-              nodeActions.moveNode({ id, posX, posY })
-            )
-          )
-      )
-    )
+  moveNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.moveNode),
+        mergeMap((val) => this.service.moveNode(val.id, val.posX, val.posY))
+      ),
+    { dispatch: false }
+  );
+
+  addNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.addNode),
+        mergeMap(({ mapId, system }) => this.service.createNode(mapId, system))
+      ),
+    { dispatch: false }
+  );
+
+  removeNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.deleteNode),
+        mergeMap(({ id }) => this.service.removeNode(id))
+      ),
+    { dispatch: false }
   );
 
   constructor(private actions$: Actions, private service: AppService) {}

@@ -1,1 +1,3 @@
 <nodes-container #nodeContainer [nodes]="nodes$ | async" [connections]="connections$ | async"></nodes-container>
+<button (click)="addNode()">Create new node</button>
+<button (click)="deleteNode()">Delete node</button>

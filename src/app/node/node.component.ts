@@ -1,6 +1,6 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, OnChanges } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { jsPlumbInstance } from 'jsplumb';
+import { jsPlumbInstance, Endpoint } from 'jsplumb';
 import { Node } from '../graphql';
 import { AppState } from '../store';
 import * as NodeActions from '../store/actions/node.action';
@@ -9,13 +9,15 @@ import * as NodeActions from '../store/actions/node.action';
   // tslint:disable-next-line:component-selector
   selector: 'node',
   templateUrl: './node.component.html',
-  styleUrls: ['./node.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./node.component.scss']
 })
-export class NodeComponent implements AfterViewInit {
+export class NodeComponent implements AfterViewInit, OnDestroy {
   @Input() node: Node;
 
   @Input() jsPlumbInstance: jsPlumbInstance;
+
+  private e1: Endpoint;
+  private e2: Endpoint;
 
   constructor(private store: Store<AppState>) {}
 
@@ -46,13 +48,13 @@ export class NodeComponent implements AfterViewInit {
       dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
-    this.jsPlumbInstance.addEndpoint(
+    this.e1 = this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
       Endpoint1
     );
-    this.jsPlumbInstance.addEndpoint(
+    this.e2 = this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Left', uuid: id + '_top' },
@@ -66,12 +68,17 @@ export class NodeComponent implements AfterViewInit {
     this.jsPlumbInstance.draggable(id, {
       stop: (val) =>
         this.store.dispatch(
-          NodeActions.startMoveNode({
+          NodeActions.moveNode({
             id,
             posX: val.pos[0],
             posY: val.pos[1],
           })
         ),
     });
+  }
+
+  ngOnDestroy() {
+    this.jsPlumbInstance.remove(this.node.id);
+    // this.jsPlumbInstance.deleteEndpoint(this.e2);
   }
 }

@@ -2,6 +2,7 @@ import {
   ComponentFactoryResolver,
   Injectable,
   ViewContainerRef,
+  ComponentRef,
 } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { NodeComponent } from './node/node.component';
@@ -15,43 +16,41 @@ export class NodeService {
 
   jsPlumbInstance = jsPlumb.getInstance();
 
+  components: { [id: string]: ComponentRef<NodeComponent> } = {};
+
   constructor(private factoryResolver: ComponentFactoryResolver) {}
 
   setRootViewContainerRef = (viewContainerRef: ViewContainerRef) => {
     this.rootViewContainer = viewContainerRef;
   }
 
-  resetNodes = () => {
-    this.rootViewContainer.clear();
-    this.jsPlumbInstance.reset(true);
-  }
-
   resetConnections = () => this.jsPlumbInstance.deleteEveryConnection();
 
   addNodes = (nodes: Node[]) => {
-    const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
-    nodes.forEach((node) => {
+    nodes.forEach((node) => this.addNode(node));
+  }
+
+  addNode = (node: Node) => {
+    if (this.components[node.id]) {
+      this.components[node.id].instance.node = node;
+    } else {
+      const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
       const component = factory.create(this.rootViewContainer.injector);
       (component.instance as any).node = node;
       (component.instance as any).jsPlumbInstance = this.jsPlumbInstance;
       this.rootViewContainer.insert(component.hostView);
-    });
+      this.components[node.id] = component;
+    }
   }
 
-  addDynamicNode = (node: Node) => {
-    const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
-    const component = factory.create(this.rootViewContainer.injector);
-    (component.instance as any).node = node;
-    (component.instance as any).jsPlumbInstance = this.jsPlumbInstance;
-    this.rootViewContainer.insert(component.hostView);
+  removeNodes = (nodes: Node[]) => {
+    nodes.forEach(node => {
+      this.components[node.id].destroy();
+    });
   }
 
   addConnections = (connections: Connection[]) => {
-    connections.forEach((connection) => {
-      this.jsPlumbInstance.connect({
-        uuids: [connection.source + '_bottom', connection.target + '_top'],
-      });
-    });
+    connections.forEach((connection) => this.addConnection(connection));
   }
 
   addConnection(connection: Connection) {
@@ -66,6 +65,10 @@ export class NodeService {
         uuids: [connection.source + '_bottom', connection.target + '_top'],
       });
     }
+  }
+
+  removeConnections = (connections: Connection[]) => {
+    connections.forEach(connection => this.removeConnection(connection));
   }
 
   removeConnection(connection: Connection) {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ComponentRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Connection, Node } from './graphql';
@@ -6,16 +6,19 @@ import { NodeService } from './node.service';
 import * as fromApp from './store';
 import * as connectionActions from './store/actions/connection.action';
 import * as nodeActions from './store/actions/node.action';
+import { jsPlumbInstance } from 'jsplumb';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   title = 'lost-ng';
   nodes$: Observable<Node[]>;
   connections$: Observable<Connection[]>;
+  jsPlumbInstance: jsPlumbInstance;
 
   constructor(
     private store: Store<fromApp.AppState>,
@@ -23,6 +26,7 @@ export class AppComponent implements OnInit {
   ) {
     this.nodes$ = store.select(fromApp.getAllNodes);
     this.connections$ = store.select(fromApp.getAllConnections);
+    this.jsPlumbInstance = this.service.jsPlumbInstance;
   }
 
   ngOnInit() {
@@ -40,13 +44,24 @@ export class AppComponent implements OnInit {
         );
       }
     });
+    this.service.jsPlumbInstance.bind('connectionDetached', (info, event) => {
+      if (event) {
+        const { sourceId, targetId } = info;
+        this.store.dispatch(
+          connectionActions.deleteConnection({
+            source: sourceId,
+            target: targetId,
+          })
+        );
+      }
+    });
   }
 
   addNode() {
-    const node = {
-      id: [Math.random().toString(16).slice(2, 8)].toString(),
-      system: { systemName: '1' },
-    } as Node;
-    this.store.dispatch(nodeActions.addNode({ node }));
+    this.store.dispatch(nodeActions.addNode({ mapId: 1, system: 31000718 }));
+  }
+
+  deleteNode() {
+    this.store.dispatch(nodeActions.deleteNode({ id: '5e97699f9bebb0235bf8f99c' }));
   }
 }

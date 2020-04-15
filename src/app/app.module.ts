@@ -13,7 +13,9 @@ import { NodeEffects } from './store/effects/node.effects';
 import { ConnectionEffects } from './store/effects/connection.effect';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { reducers } from './store';
-
+import { AkitaNgDevtools } from '@datorama/akita-ngdevtools';
+import { AkitaNgRouterStoreModule } from '@datorama/akita-ng-router-store';
+import { environment } from '../environments/environment';
 @NgModule({
   imports: [
     BrowserModule,
@@ -24,6 +26,8 @@ import { reducers } from './store';
     StoreModule.forRoot({}, {}),
     StoreModule.forFeature('app', reducers),
     EffectsModule.forRoot([NodeEffects, ConnectionEffects]),
+    environment.production ? [] : AkitaNgDevtools.forRoot(),
+    AkitaNgRouterStoreModule.forRoot(),
   ],
   declarations: [AppComponent, NodeComponent, NodesContainerComponent],
   entryComponents: [NodeComponent],

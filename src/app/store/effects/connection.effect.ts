@@ -20,19 +20,26 @@ export class ConnectionEffects {
     )
   );
 
-  createConnection$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(connectionActions.createConnection),
-      mergeMap(({ mapId, source, target }) =>
-        this.service.createConnection(mapId, source, target).pipe(
-          map((connection) =>
-            connectionActions.addConnection({
-              connection,
-            })
-          )
+  createConnection$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(connectionActions.createConnection),
+        mergeMap(({ mapId, source, target }) =>
+          this.service.createConnection(mapId, source, target)
         )
-      )
-    )
+      ),
+    { dispatch: false }
+  );
+
+  removeConnect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(connectionActions.deleteConnection),
+        mergeMap(({ source, target }) =>
+          this.service.removeConnection(source, target)
+        )
+      ),
+    { dispatch: false }
   );
 
   constructor(private actions$: Actions, private service: AppService) {}

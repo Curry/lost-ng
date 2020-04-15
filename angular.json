@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "lost-ng"
+    }
+  },
+  "defaultProject": "lost-ng",
+  "cli": {
+    "defaultCollection": "@datorama/akita"
+  }
 }

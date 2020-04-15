@@ -75,6 +75,18 @@ query Updates($map: Float!) {
   }
 }
 
+mutation AddNode($map: Float!, $system: Float!) {
+  addNode(map: $map, system: $system) {
+    id
+  }
+}
+
+mutation DeleteNode($id: String!) {
+  deleteNode(id: $id) {
+    id
+  }
+}
+
 mutation AddConnection($map: Float!, $source: String!, $target: String!) {
   addConnection(map: $map, source: $source, target: $target) {
     id
@@ -90,6 +102,10 @@ mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
   removeConnection(map: $map, source: $source, target: $target) {
     id
   }
+}
+
+mutation DeleteConnectionByNode($nodeId: String!) {
+  removeConnectionsByNode(nodeId: $nodeId)
 }
 
 mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {

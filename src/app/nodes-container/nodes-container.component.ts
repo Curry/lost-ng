@@ -33,11 +33,16 @@ export class NodesContainerComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.nodes) {
-      this.nodeService.resetNodes();
+      const prev = changes.nodes.previousValue || [];
+      this.nodeService.removeNodes(prev.filter((n: Node) => !this.nodes.map(no => no.id).includes(n.id)));
       this.nodeService.addNodes(this.nodes);
     }
+    if (changes.connections) {
+      const prev = changes.connections.previousValue || [];
+      this.nodeService.removeConnections(prev.filter((c: Connection) => !this.connections.map(co => co.id).includes(c.id)));
+    }
     timer().subscribe(() => {
-      this.nodeService.resetConnections();
+      this.nodes.forEach(node => this.nodeService.jsPlumbInstance.revalidate(node.id));
       this.nodeService.addConnections(this.connections);
     });
   }

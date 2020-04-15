@@ -20,6 +20,6 @@ export const createConnection = createAction(
   createConnectionType,
   props<{ mapId: number; source: string; target: string }>()
 );
-export const deleteConnection = createAction(deleteConnectionType);
+export const deleteConnection = createAction(deleteConnectionType, props<{ source: string, target: string }>());
 export const resetConnections = createAction(resetConnectionsType);
 export const getConnections = createAction(getConnectionsType);

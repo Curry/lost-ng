@@ -144,5 +144,10 @@
   },
   "rulesDirectory": [
     "codelyzer"
-  ]
+  ],
+  "linterOptions": {
+    "exclude": [
+      "src/app/graphql.ts"
+    ]
+  }
 }
