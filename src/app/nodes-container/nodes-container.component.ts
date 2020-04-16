@@ -22,13 +22,22 @@ export class NodesContainerComponent implements OnInit, OnChanges {
 
   @Input() connections: Connection[];
 
+  jsPlumbInstance;
+
   @ViewChild('nodes', { read: ViewContainerRef, static: true })
   viewContainerRef: ViewContainerRef;
 
-  constructor(private nodeService: NodeService) {}
+  constructor(private nodeService: NodeService) {
+    this.jsPlumbInstance = nodeService.jsPlumbInstance;
+  }
 
   ngOnInit() {
     this.nodeService.setRootViewContainerRef(this.viewContainerRef);
+    this.nodeService.addNodes(this.nodes);
+    timer().subscribe(() => {
+      this.nodes.forEach(node => this.nodeService.jsPlumbInstance.revalidate(node.id));
+      this.nodeService.addConnections(this.connections);
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {

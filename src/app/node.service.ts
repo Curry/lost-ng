@@ -3,6 +3,7 @@ import {
   Injectable,
   ViewContainerRef,
   ComponentRef,
+  ViewRef,
 } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { NodeComponent } from './node/node.component';
@@ -17,6 +18,11 @@ export class NodeService {
   jsPlumbInstance = jsPlumb.getInstance();
 
   components: { [id: string]: ComponentRef<NodeComponent> } = {};
+
+  instances: { [id: string]: {
+    component: ComponentRef<NodeComponent>,
+    view: ViewRef
+  }};
 
   constructor(private factoryResolver: ComponentFactoryResolver) {}
 
@@ -36,8 +42,11 @@ export class NodeService {
     } else {
       const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
       const component = factory.create(this.rootViewContainer.injector);
-      (component.instance as any).node = node;
-      (component.instance as any).jsPlumbInstance = this.jsPlumbInstance;
+      component.instance.node = node;
+      component.instance.jsPlumbInstance = this.jsPlumbInstance;
+      component.onDestroy(() => {
+        this.jsPlumbInstance.remove(node.id);
+      });
       this.rootViewContainer.insert(component.hostView);
       this.components[node.id] = component;
     }
@@ -46,6 +55,7 @@ export class NodeService {
   removeNodes = (nodes: Node[]) => {
     nodes.forEach(node => {
       this.components[node.id].destroy();
+      delete this.components[node.id];
     });
   }
 

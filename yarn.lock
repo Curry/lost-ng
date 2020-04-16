@@ -1140,6 +1140,13 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@datorama/akita-ng-entity-service@^1.0.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@datorama/akita-ng-entity-service/-/akita-ng-entity-service-1.3.0.tgz#35bd1ebdb720c0e3077bd808a3657887aea7e039"
+  integrity sha512-QCKzm4eLO2LeCn6JGTRGObanqffQPgstTom3Fa9OcMmKdbXcNt6l41ZKnmtLdYzTju/DBDYJVj70rjmHEUpW3g==
+  dependencies:
+    tslib "^1.9.0"
+
 "@datorama/akita-ng-router-store@^3.1.3":
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/@datorama/akita-ng-router-store/-/akita-ng-router-store-3.1.4.tgz#3ee352ea7ea21cead884532af098f5b5b154c82f"

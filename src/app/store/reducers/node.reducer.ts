@@ -14,18 +14,18 @@ const nodeReducer = createReducer(
   on(NodeActions.resetNodes, (state) => adapter.removeAll(state)),
   on(NodeActions.loadNodes, (state, { nodes }) => adapter.setAll(nodes, state)),
   // on(NodeActions.addNode, (state, { node }) => adapter.addOne(node, state)),
-  // on(NodeActions.moveNode, (state, { id, posX, posY }) =>
-  //   adapter.updateOne(
-  //     {
-  //       id,
-  //       changes: {
-  //         posX,
-  //         posY,
-  //       },
-  //     },
-  //     state
-  //   )
-  // )
+  on(NodeActions.moveNode, (state, { id, posX, posY }) =>
+    adapter.updateOne(
+      {
+        id,
+        changes: {
+          posX,
+          posY,
+        },
+      },
+      state
+    )
+  )
 );
 
 export function reducer(state: NodeState | undefined, action: Action) {

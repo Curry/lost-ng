@@ -1,25 +1,20 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, OnChanges } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { jsPlumbInstance, Endpoint } from 'jsplumb';
+import { AfterViewInit, Component, Input } from '@angular/core';
+import { jsPlumbInstance } from 'jsplumb';
 import { Node } from '../graphql';
-import { AppState } from '../store';
-import * as NodeActions from '../store/actions/node.action';
+import { NodeService } from '../state/node/node.service';
 
 @Component({
   // tslint:disable-next-line:component-selector
   selector: 'node',
   templateUrl: './node.component.html',
-  styleUrls: ['./node.component.scss']
+  styleUrls: ['./node.component.scss'],
 })
-export class NodeComponent implements AfterViewInit, OnDestroy {
+export class NodeComponent implements AfterViewInit {
   @Input() node: Node;
 
   @Input() jsPlumbInstance: jsPlumbInstance;
 
-  private e1: Endpoint;
-  private e2: Endpoint;
-
-  constructor(private store: Store<AppState>) {}
+  constructor(private service: NodeService) {}
 
   createEndpoints = () => {
     const exampleDropOptions = {
@@ -48,13 +43,13 @@ export class NodeComponent implements AfterViewInit, OnDestroy {
       dropOptions: exampleDropOptions,
     };
     const { id } = this.node;
-    this.e1 = this.jsPlumbInstance.addEndpoint(
+    this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
       Endpoint1
     );
-    this.e2 = this.jsPlumbInstance.addEndpoint(
+    this.jsPlumbInstance.addEndpoint(
       id,
       // @ts-ignore
       { anchor: 'Left', uuid: id + '_top' },
@@ -66,19 +61,7 @@ export class NodeComponent implements AfterViewInit, OnDestroy {
     const { id } = this.node;
     this.createEndpoints();
     this.jsPlumbInstance.draggable(id, {
-      stop: (val) =>
-        this.store.dispatch(
-          NodeActions.moveNode({
-            id,
-            posX: val.pos[0],
-            posY: val.pos[1],
-          })
-        ),
+      stop: (val) => this.service.move(id, val.pos[0], val.pos[1]).subscribe(),
     });
-  }
-
-  ngOnDestroy() {
-    this.jsPlumbInstance.remove(this.node.id);
-    // this.jsPlumbInstance.deleteEndpoint(this.e2);
   }
 }
