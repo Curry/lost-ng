@@ -55,6 +55,7 @@
         ]
       }
     ],
+    "no-namespace": false,
     "no-console": [
       true,
       "debug",

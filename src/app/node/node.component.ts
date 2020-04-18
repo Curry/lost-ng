@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, Input } from '@angular/core';
 import { jsPlumbInstance } from 'jsplumb';
 import { Node } from '../graphql';
-import { AppState } from '../store';
-import * as nodeActions from '../store/actions/node.action';
-import { Store } from '@ngrx/store';
 import { timer } from 'rxjs';
+import { Store } from '@ngxs/store';
+import { NodeActions } from '../store/map/map.actions';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -19,7 +18,7 @@ export class NodeComponent implements AfterViewInit {
 
   clickable = true;
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store) {}
 
   createEndpoints = () => {
     const exampleDropOptions = {
@@ -70,14 +69,11 @@ export class NodeComponent implements AfterViewInit {
         this.clickable = false;
       },
       stop: (val) => {
-        this.store.dispatch(
-          nodeActions.moveNode({ id, posX: val.pos[0], posY: val.pos[1] })
-        );
+        this.store.dispatch(new NodeActions.MoveNode(id, val.pos[0], val.pos[1]));
         timer(500).subscribe(() => {
           this.clickable = true;
         });
       },
-      // stop: (val) => this.service.move(id, val.pos[0], val.pos[1]).subscribe(),
     });
   }
 
