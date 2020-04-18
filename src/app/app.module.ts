@@ -7,8 +7,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { NodeComponent } from './node/node.component';
 import { NodesContainerComponent } from './nodes-container/nodes-container.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-// import { AkitaNgDevtools } from '@datorama/akita-ngdevtools';
-// import { AkitaNgRouterStoreModule } from '@datorama/akita-ng-router-store';
 import { environment } from '../environments/environment';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -32,8 +30,8 @@ import { ConnectionEffects } from './store/effects/connection.effect';
     StoreModule.forFeature('app', reducers),
     EffectsModule.forRoot([NodeEffects, ConnectionEffects]),
     StoreDevtoolsModule.instrument({
-      maxAge: 25, // Retains last 25 states
-      logOnly: environment.production, // Restrict extension to log-only mode
+      maxAge: 25,
+      logOnly: environment.production
     }),
   ],
   declarations: [AppComponent, NodeComponent, NodesContainerComponent],

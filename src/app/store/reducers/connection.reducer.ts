@@ -15,9 +15,12 @@ const connectionReducer = createReducer(
   on(ConnectionActions.loadConnections, (state, { connections }) =>
     adapter.setAll(connections, state)
   ),
-  // on(ConnectionActions.addConnection, (state, { connection }) =>
-  //   adapter.addOne(connection, state)
-  // ),
+  on(ConnectionActions.addConnection, (state, { connection }) =>
+    adapter.addOne(connection, state)
+  ),
+  on(ConnectionActions.deleteConnection, (state, { id }) =>
+    adapter.removeOne(id, state)
+  ),
 );
 
 export function reducer(state: ConnectionState | undefined, action: Action) {

@@ -7,6 +7,7 @@ import {
   createFeatureSelector,
   ActionReducer,
 } from '@ngrx/store';
+import { Connection } from 'src/app/graphql';
 
 export interface AppState {
   nodes: fromNode.NodeState;
@@ -35,21 +36,20 @@ export const getConnectionState = createSelector(
   (state: AppState) => state.connections
 );
 
-// export const getNodeEntities = createSelector(
-//   getNodeState,
-//   (state: fromNode.NodeState) => state.nodes
-// );
-
-// export const getAllNodes = createSelector(
-//   getNodeEntities,
-//   (nodes) => Object.keys(nodes).map(id => nodes[id])
-// );
-
 export const getAllNodes = createSelector(getNodeState, fromNode.selectAll);
 
 export const getAllConnections = createSelector(
   getConnectionState,
   fromConnection.selectAll
+);
+
+export const getConnectionByEndpoints = createSelector(
+  getAllConnections,
+  (connections: Connection[], props: { source: string; target: string }) =>
+    connections.find(
+      (connection) =>
+        connection.source === props.source && connection.target === props.target
+    )
 );
 interface History {
   past: Array<AppState>;
@@ -59,7 +59,7 @@ interface History {
 
 export const debug = (reducer: ActionReducer<any>): ActionReducer<any> => {
   return (state, action) => {
-    console.dir(state, action);
+    // console.dir(state, action);
     return reducer(state, action);
   };
 };

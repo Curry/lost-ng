@@ -174,9 +174,12 @@ export class AppService {
   ) {}
 
   getNodes = () => {
-    const queryRef = this.nodes.watch({ map: 1 });
-    queryRef.startPolling(this.POLL_RATE);
-    return queryRef.valueChanges.pipe(map((val) => val.data.nodes as Node[]));
+    // const queryRef = this.nodes.watch({ map: 1 });
+    // queryRef.startPolling(this.POLL_RATE);
+    // return queryRef.valueChanges.pipe(map((val) => val.data.nodes as Node[]));
+    return this.nodes
+      .fetch({ map: 1 })
+      .pipe(map((val) => val.data.nodes as Node[]));
     // return of(this.testNodes).pipe(map((val) => val.data.nodes as Node[]));
   }
 
@@ -201,11 +204,14 @@ export class AppService {
   }
 
   getConnections = () => {
-    const queryRef = this.connections.watch({ map: 1 });
-    queryRef.startPolling(this.POLL_RATE);
-    return queryRef.valueChanges.pipe(
-      map((val) => val.data.connections as Connection[])
-    );
+    // const queryRef = this.connections.watch({ map: 1 });
+    // queryRef.startPolling(this.POLL_RATE);
+    // return queryRef.valueChanges.pipe(
+    //   map((val) => val.data.connections as Connection[])
+    // );
+    return this.connections
+      .fetch({ map: 1 })
+      .pipe(map((val) => val.data.connections as Connection[]));
     // return of(this.testConnections).pipe(map((val) => val.data.connections as Connection[]));
   }
 

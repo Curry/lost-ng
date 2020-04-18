@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, Input } from '@angular/core';
 import { jsPlumbInstance } from 'jsplumb';
 import { Node } from '../graphql';
-import { NodeService } from '../state/node/node.service';
 import { AppState } from '../store';
 import * as nodeActions from '../store/actions/node.action';
 import { Store } from '@ngrx/store';
@@ -20,7 +19,7 @@ export class NodeComponent implements AfterViewInit {
 
   clickable = true;
 
-  constructor(private service: NodeService, private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>) {}
 
   createEndpoints = () => {
     const exampleDropOptions = {
