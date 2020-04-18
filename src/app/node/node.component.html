@@ -1,3 +1,3 @@
-<div class="node" id="{{node.id}}" [style.top.px]="node.posY" [style.left.px]="node.posX">
-  {{node.alias || node.system.systemName}}
-</div>
+<mat-card class="node" id="{{node.id}}" [style.top.px]="node.posY" [style.left.px]="node.posX" (click)="onClick()">
+  <mat-card-title>{{node.alias || node.system.systemName}}</mat-card-title>
+</mat-card>

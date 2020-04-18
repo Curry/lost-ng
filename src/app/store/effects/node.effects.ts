@@ -28,23 +28,23 @@ export class NodeEffects {
   //   { dispatch: false }
   // );
 
-  // addNode$ = createEffect(
-  //   () =>
-  //     this.actions$.pipe(
-  //       ofType(nodeActions.addNode),
-  //       mergeMap(({ mapId, system }) => this.service.createNode(mapId, system))
-  //     ),
-  //   { dispatch: false }
-  // );
+  addNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.addNode),
+        mergeMap(({ mapId, system }) => this.service.createNode(mapId, system))
+      ),
+    { dispatch: false }
+  );
 
-  // removeNode$ = createEffect(
-  //   () =>
-  //     this.actions$.pipe(
-  //       ofType(nodeActions.deleteNode),
-  //       mergeMap(({ id }) => this.service.removeNode(id))
-  //     ),
-  //   { dispatch: false }
-  // );
+  removeNode$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(nodeActions.deleteNode),
+        mergeMap(({ id }) => this.service.removeNode(id))
+      ),
+    { dispatch: false }
+  );
 
   constructor(private actions$: Actions, private service: AppService) {}
 }

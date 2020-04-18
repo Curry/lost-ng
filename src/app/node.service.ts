@@ -19,11 +19,6 @@ export class NodeService {
 
   components: { [id: string]: ComponentRef<NodeComponent> } = {};
 
-  instances: { [id: string]: {
-    component: ComponentRef<NodeComponent>,
-    view: ViewRef
-  }};
-
   constructor(private factoryResolver: ComponentFactoryResolver) {}
 
   setRootViewContainerRef = (viewContainerRef: ViewContainerRef) => {
@@ -33,7 +28,10 @@ export class NodeService {
   resetConnections = () => this.jsPlumbInstance.deleteEveryConnection();
 
   addNodes = (nodes: Node[]) => {
-    nodes.forEach((node) => this.addNode(node));
+    nodes.forEach((node) => {
+      this.addNode(node);
+      // this.jsPlumbInstance.revalidate(node.id);
+    });
   }
 
   addNode = (node: Node) => {
@@ -57,6 +55,10 @@ export class NodeService {
       this.components[node.id].destroy();
       delete this.components[node.id];
     });
+  }
+
+  revalidate = (nodes: Node[]) => {
+    nodes.forEach(node => this.jsPlumbInstance.revalidate(node.id));
   }
 
   addConnections = (connections: Connection[]) => {

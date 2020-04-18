@@ -21,7 +21,7 @@ export class NodeService {
     queryRef.startPolling(1000);
     return queryRef.valueChanges.pipe(
       map((val) => val.data.nodes as Node[]),
-      tap((val) => this.nodeStore.set(val))
+      tap((val) => this.nodeStore.upsertMany(val))
     );
   }
 
@@ -34,6 +34,14 @@ export class NodeService {
       id,
       posX,
       posY
+    }, {
+      update: (store, { data: { moveNode }}) => {
+        console.log(moveNode);
+        this.nodeStore.update(id, {
+          posX,
+          posY,
+        });
+      }
     });
   }
 

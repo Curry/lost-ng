@@ -2,6 +2,10 @@ import { AfterViewInit, Component, Input } from '@angular/core';
 import { jsPlumbInstance } from 'jsplumb';
 import { Node } from '../graphql';
 import { NodeService } from '../state/node/node.service';
+import { AppState } from '../store';
+import * as nodeActions from '../store/actions/node.action';
+import { Store } from '@ngrx/store';
+import { timer } from 'rxjs';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -14,7 +18,9 @@ export class NodeComponent implements AfterViewInit {
 
   @Input() jsPlumbInstance: jsPlumbInstance;
 
-  constructor(private service: NodeService) {}
+  clickable = true;
+
+  constructor(private service: NodeService, private store: Store<AppState>) {}
 
   createEndpoints = () => {
     const exampleDropOptions = {
@@ -61,7 +67,22 @@ export class NodeComponent implements AfterViewInit {
     const { id } = this.node;
     this.createEndpoints();
     this.jsPlumbInstance.draggable(id, {
-      stop: (val) => this.service.move(id, val.pos[0], val.pos[1]).subscribe(),
+      start: (val) => {
+        this.clickable = false;
+      },
+      stop: (val) => {
+        this.store.dispatch(
+          nodeActions.moveNode({ id, posX: val.pos[0], posY: val.pos[1] })
+        );
+        timer(500).subscribe(() => {
+          this.clickable = true;
+        });
+      },
+      // stop: (val) => this.service.move(id, val.pos[0], val.pos[1]).subscribe(),
     });
+  }
+
+  onClick = () => {
+    console.log(this.clickable);
   }
 }

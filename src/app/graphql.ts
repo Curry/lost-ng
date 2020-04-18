@@ -263,7 +263,14 @@ export type Ship = {
 export type Subscription = {
    __typename?: 'Subscription';
   corpChanged: Corporation;
+  connectionAdded: Connection;
+  connectionRemoved: Scalars['String'];
   nodeAdded: Node;
+};
+
+
+export type SubscriptionConnectionAddedArgs = {
+  map: Scalars['Float'];
 };
 
 
@@ -331,19 +338,19 @@ export type ConnectionsQuery = (
   )> }
 );
 
-export type UpdatesQueryVariables = {
+export type AppQueryVariables = {
   map: Scalars['Float'];
 };
 
 
-export type UpdatesQuery = (
+export type AppQuery = (
   { __typename?: 'Query' }
   & { connections: Array<(
     { __typename?: 'Connection' }
     & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
   )>, nodes: Array<(
     { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId'>
+    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY'>
     & { system: (
       { __typename?: 'System' }
       & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
@@ -458,6 +465,19 @@ export type WatchNodesSubscription = (
   ) }
 );
 
+export type WatchConnectionsSubscriptionVariables = {
+  map: Scalars['Float'];
+};
+
+
+export type WatchConnectionsSubscription = (
+  { __typename?: 'Subscription' }
+  & { connectionAdded: (
+    { __typename?: 'Connection' }
+    & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
+  ) }
+);
+
 export const NodesDocument = gql`
     query Nodes($map: Float!) {
   nodes(map: $map) {
@@ -517,8 +537,8 @@ export const ConnectionsDocument = gql`
     document = ConnectionsDocument;
     
   }
-export const UpdatesDocument = gql`
-    query Updates($map: Float!) {
+export const AppDocument = gql`
+    query App($map: Float!) {
   connections: connections(map: $map) {
     id
     mapId
@@ -530,6 +550,9 @@ export const UpdatesDocument = gql`
   nodes: nodes(map: $map) {
     id
     mapId
+    alias
+    posX
+    posY
     system {
       id
       regionId
@@ -557,8 +580,8 @@ export const UpdatesDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class UpdatesGQL extends Apollo.Query<UpdatesQuery, UpdatesQueryVariables> {
-    document = UpdatesDocument;
+  export class AppGQL extends Apollo.Query<AppQuery, AppQueryVariables> {
+    document = AppDocument;
     
   }
 export const AddNodeDocument = gql`
@@ -686,5 +709,25 @@ export const WatchNodesDocument = gql`
   })
   export class WatchNodesGQL extends Apollo.Subscription<WatchNodesSubscription, WatchNodesSubscriptionVariables> {
     document = WatchNodesDocument;
+    
+  }
+export const WatchConnectionsDocument = gql`
+    subscription WatchConnections($map: Float!) {
+  connectionAdded(map: $map) {
+    id
+    mapId
+    source
+    target
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class WatchConnectionsGQL extends Apollo.Subscription<WatchConnectionsSubscription, WatchConnectionsSubscriptionVariables> {
+    document = WatchConnectionsDocument;
     
   }

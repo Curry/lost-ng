@@ -10,37 +10,38 @@ export class ConnectionEffects {
     this.actions$.pipe(
       ofType(connectionActions.getConnections),
       mergeMap(() =>
-        this.service.getConnections().pipe(
-          map((connections) =>
-            connectionActions.loadConnections({ connections })
-          ),
-          catchError(() => EMPTY)
-        )
-      )
+      this.service.getConnections().pipe(
+        map((connections) =>
+          connectionActions.loadConnections({ connections })
+        ),
+        catchError(() => EMPTY)))
     )
   );
 
-  // createConnection$ = createEffect(
-  //   () =>
-  //     this.actions$.pipe(
-  //       ofType(connectionActions.createConnection),
-  //       mergeMap(({ mapId, source, target }) =>
-  //         this.service.createConnection(mapId, source, target)
-  //       )
-  //     ),
-  //   { dispatch: false }
-  // );
+  createConnection$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(connectionActions.createConnection),
+        mergeMap(({ mapId, source, target }) =>
+          this.service.createConnection(mapId, source, target)
+        )
+      ),
+    { dispatch: false }
+  );
 
-  // removeConnect$ = createEffect(
-  //   () =>
-  //     this.actions$.pipe(
-  //       ofType(connectionActions.deleteConnection),
-  //       mergeMap(({ source, target }) =>
-  //         this.service.removeConnection(source, target)
-  //       )
-  //     ),
-  //   { dispatch: false }
-  // );
+  removeConnect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(connectionActions.deleteConnection),
+        mergeMap(({ source, target }) =>
+          this.service.removeConnection(source, target)
+        )
+      ),
+    { dispatch: false }
+  );
 
-  constructor(private actions$: Actions, private service: AppService) {}
+  constructor(
+    private actions$: Actions,
+    private service: AppService,
+  ) {}
 }

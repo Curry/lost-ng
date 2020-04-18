@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { ID } from '@datorama/akita';
-import { HttpClient } from '@angular/common/http';
 import { ConnectionStore } from './connection.store';
 import { Connection } from './connection.model';
 import { tap, map } from 'rxjs/operators';
-import { ConnectionsGQL, AddConnectionGQL, RemoveConnectionGQL } from 'src/app/graphql';
+import {
+  ConnectionsGQL,
+  AddConnectionGQL,
+  RemoveConnectionGQL,
+  WatchConnectionsGQL,
+} from 'src/app/graphql';
 
 @Injectable({ providedIn: 'root' })
 export class ConnectionService {
@@ -13,6 +16,7 @@ export class ConnectionService {
     private connections: ConnectionsGQL,
     private addConnection: AddConnectionGQL,
     private removeConnection: RemoveConnectionGQL,
+    private subConnection: WatchConnectionsGQL
   ) {}
 
   get() {
@@ -38,7 +42,9 @@ export class ConnectionService {
       map: 1,
       source,
       target,
-    });
+    }).pipe(
+      map(val => val.data.addConnection as Connection)
+    );
   }
 
   update(id, connection: Partial<Connection>) {
@@ -52,4 +58,13 @@ export class ConnectionService {
       target,
     });
   }
+
+  onAdd() {
+    return this.subConnection.subscribe({ map: 1 }).pipe(
+      map((val) => val.data.connectionAdded as Connection),
+      tap((val) => this.connectionStore.add(val))
+    );
+  }
+
+  onDelete() {}
 }

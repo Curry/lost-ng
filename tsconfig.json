@@ -20,5 +20,8 @@
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true
-  }
+  },
+  "exclude": [
+    "./src/app/state/**/*.ts"
+  ]
 }

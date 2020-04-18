@@ -39,7 +39,7 @@ query Connections($map: Float!) {
   }
 }
 
-query Updates($map: Float!) {
+query App($map: Float!) {
   connections: connections(map: $map) {
     id
     mapId
@@ -52,6 +52,9 @@ query Updates($map: Float!) {
   nodes: nodes(map: $map) {
     id
     mapId
+    alias
+    posX
+    posY
     system {
       id
       regionId
@@ -136,5 +139,16 @@ subscription WatchNodes($map: Float!) {
         maxOnePass
       }
     }
+  }
+}
+
+subscription WatchConnections($map: Float!) {
+  connectionAdded(map: $map) {
+    id
+    mapId
+    source
+    target
+    createdAt
+    updatedAt
   }
 }

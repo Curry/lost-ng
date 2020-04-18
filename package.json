@@ -28,6 +28,7 @@
     "@ngrx/effects": "^9.1.0",
     "@ngrx/entity": "^9.1.0",
     "@ngrx/store": "^9.1.0",
+    "@ngrx/store-devtools": "^9.1.0",
     "apollo-angular": "^1.9.1",
     "apollo-angular-link-http": "^1.10.0",
     "apollo-cache-inmemory": "^1.6.5",
