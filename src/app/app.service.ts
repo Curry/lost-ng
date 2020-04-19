@@ -184,7 +184,9 @@ export class AppService {
   }
 
   createNode = (mapId: number, system: number) => {
-    return this.addNode.mutate({ map: mapId, system });
+    return this.addNode.mutate({ map: mapId, system }).pipe(
+      map(val => val.data.addNode)
+    );
   }
 
   moveNode = (id: string, posX: number, posY: number) => {
@@ -226,6 +228,8 @@ export class AppService {
   }
 
   removeConnection = (source: string, target: string) => {
-    return this.deleteConnection.mutate({ map: 1, source, target });
+    return this.deleteConnection.mutate({ map: 1, source, target }).pipe(
+      map(val => val.data.removeConnection)
+    );
   }
 }

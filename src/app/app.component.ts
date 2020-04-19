@@ -38,22 +38,22 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.store.dispatch(new NodeActions.LoadNodes());
-    this.store.dispatch(new ConnectionActions.LoadConnections());
+    this.store.dispatch(new NodeActions.Load());
+    this.store.dispatch(new ConnectionActions.Load());
     this.service.jsPlumbInstance.bind('connection', (info, event) => {
       if (event) {
-        this.store.dispatch(new ConnectionActions.AddConnection(info.sourceId, info.targetId));
+        this.store.dispatch(new ConnectionActions.Add(info.sourceId, info.targetId));
       }
     });
     this.service.jsPlumbInstance.bind('connectionDetached', (info, event) => {
       if (event) {
-        this.store.dispatch(new ConnectionActions.RemoveConnection(info.sourceId, info.targetId));
+        this.store.dispatch(new ConnectionActions.Remove(info.sourceId, info.targetId));
       }
     });
   }
 
   addNode() {
-    this.store.dispatch(new NodeActions.AddNode({
+    this.store.dispatch(new NodeActions.Add({
       id: 'potato',
       mapId: 1,
       systemId: 31000718,

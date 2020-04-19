@@ -81,6 +81,31 @@ query App($map: Float!) {
 mutation AddNode($map: Float!, $system: Float!) {
   addNode(map: $map, system: $system) {
     id
+    mapId
+    alias
+    posX
+    posY
+    systemId
+    system {
+      id
+      regionId
+      constellationId
+      systemName
+      class
+      effect
+      trueSec
+      statics {
+        id
+        name
+        sourceClasses
+        targetClass
+        lifetime
+        maxMass
+        massRegen
+        maxOnePass
+        scanStrength
+      }
+    }
   }
 }
 

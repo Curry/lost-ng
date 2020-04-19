@@ -69,7 +69,7 @@ export class NodeComponent implements AfterViewInit {
         this.clickable = false;
       },
       stop: (val) => {
-        this.store.dispatch(new NodeActions.MoveNode(id, val.pos[0], val.pos[1]));
+        this.store.dispatch(new NodeActions.Move(id, val.pos[0], val.pos[1]));
         timer(500).subscribe(() => {
           this.clickable = true;
         });

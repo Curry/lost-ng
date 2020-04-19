@@ -372,7 +372,15 @@ export type AddNodeMutation = (
   { __typename?: 'Mutation' }
   & { addNode: (
     { __typename?: 'Node' }
-    & Pick<Node, 'id'>
+    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
+    & { system: (
+      { __typename?: 'System' }
+      & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
+      & { statics: Array<(
+        { __typename?: 'Wormhole' }
+        & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
+      )> }
+    ) }
   ) }
 );
 
@@ -588,6 +596,31 @@ export const AddNodeDocument = gql`
     mutation AddNode($map: Float!, $system: Float!) {
   addNode(map: $map, system: $system) {
     id
+    mapId
+    alias
+    posX
+    posY
+    systemId
+    system {
+      id
+      regionId
+      constellationId
+      systemName
+      class
+      effect
+      trueSec
+      statics {
+        id
+        name
+        sourceClasses
+        targetClass
+        lifetime
+        maxMass
+        massRegen
+        maxOnePass
+        scanStrength
+      }
+    }
   }
 }
     `;
