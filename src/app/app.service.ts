@@ -20,148 +20,6 @@ import { of } from 'rxjs';
 export class AppService {
   private readonly POLL_RATE = 1000;
 
-  private testConnections = {
-    data: {
-      connections: [
-        {
-          id: '5e97a0f49bebb0235bf8f99d',
-          mapId: 1,
-          source: '5e94f19d2177631983fa1c79',
-          target: '5e94f1ae2177631983fa1c7a',
-          createdAt: '2020-04-16T00:04:04.365Z',
-          updatedAt: '2020-04-16T00:04:04.365Z',
-          __typename: 'Connection',
-        },
-      ],
-    },
-  };
-
-  private testNodes = {
-    data: {
-      nodes: [
-        {
-          id: '5e94f1852177631983fa1c78',
-          mapId: 1,
-          alias: null,
-          posX: 236,
-          posY: 360,
-          system: {
-            id: 31002003,
-            regionId: 11000025,
-            constellationId: 21000247,
-            systemName: 'J114154',
-            class: 'C5',
-            effect: 'cataclysmic',
-            trueSec: -0.99,
-            statics: [
-              {
-                id: 30702,
-                name: 'H296',
-                sourceClasses: ['C5'],
-                targetClass: 'C5',
-                lifetime: 1440,
-                maxMass: 3300000000,
-                massRegen: 0,
-                maxOnePass: 1480000000,
-                scanStrength: 10,
-                __typename: 'Wormhole',
-              },
-            ],
-            __typename: 'System',
-          },
-          __typename: 'Node',
-        },
-        {
-          id: '5e94f19d2177631983fa1c79',
-          mapId: 1,
-          alias: null,
-          posX: 159,
-          posY: 175,
-          system: {
-            id: 31000714,
-            regionId: 11000007,
-            constellationId: 21000056,
-            systemName: 'J163923',
-            class: 'C2',
-            effect: null,
-            trueSec: -0.99,
-            statics: [
-              {
-                id: 30675,
-                name: 'N062',
-                sourceClasses: ['C2'],
-                targetClass: 'C5',
-                lifetime: 1440,
-                maxMass: 3000000000,
-                massRegen: 0,
-                maxOnePass: 300000000,
-                scanStrength: 2.5,
-                __typename: 'Wormhole',
-              },
-              {
-                id: 30679,
-                name: 'E545',
-                sourceClasses: ['C2'],
-                targetClass: 'NULL',
-                lifetime: 960,
-                maxMass: 2000000000,
-                massRegen: 0,
-                maxOnePass: 300000000,
-                scanStrength: 2.5,
-                __typename: 'Wormhole',
-              },
-            ],
-            __typename: 'System',
-          },
-          __typename: 'Node',
-        },
-        {
-          id: '5e94f1ae2177631983fa1c7a',
-          mapId: 1,
-          alias: null,
-          posX: 515,
-          posY: 220,
-          system: {
-            id: 31000734,
-            regionId: 11000007,
-            constellationId: 21000058,
-            systemName: 'J115700',
-            class: 'C2',
-            effect: 'wolfRayet',
-            trueSec: -0.99,
-            statics: [
-              {
-                id: 30675,
-                name: 'N062',
-                sourceClasses: ['C2'],
-                targetClass: 'C5',
-                lifetime: 1440,
-                maxMass: 3000000000,
-                massRegen: 0,
-                maxOnePass: 300000000,
-                scanStrength: 2.5,
-                __typename: 'Wormhole',
-              },
-              {
-                id: 30679,
-                name: 'E545',
-                sourceClasses: ['C2'],
-                targetClass: 'NULL',
-                lifetime: 960,
-                maxMass: 2000000000,
-                massRegen: 0,
-                maxOnePass: 300000000,
-                scanStrength: 2.5,
-                __typename: 'Wormhole',
-              },
-            ],
-            __typename: 'System',
-          },
-          __typename: 'Node',
-        },
-      ],
-    },
-  };
   constructor(
     private nodes: NodesGQL,
     private connections: ConnectionsGQL,
@@ -180,7 +38,6 @@ export class AppService {
     return this.nodes
       .fetch({ map: 1 })
       .pipe(map((val) => val.data.nodes as Node[]));
-    // return of(this.testNodes).pipe(map((val) => val.data.nodes as Node[]));
   }
 
   createNode = (mapId: number, system: number) => {
@@ -195,14 +52,19 @@ export class AppService {
       .pipe(map((val) => val.data.moveNode));
   }
 
-  removeNode = (id: string) => {
+  removeNode = (systemId: number) => {
     return this.deleteNode
-      .mutate({ id })
-      .pipe(mergeMap((val) => this.removeConnectionByNode(id)));
+      .mutate({ systemId })
+      .pipe(
+        map(val => val.data.deleteNodeBySystem),
+        mergeMap((val) => this.removeConnectionByNode(val.id))
+      );
   }
 
   removeConnectionByNode = (nodeId: string) => {
-    return this.deleteConnectionByNode.mutate({ nodeId });
+    return this.deleteConnectionByNode.mutate({ nodeId }).pipe(
+      map(() => nodeId)
+    );
   }
 
   getConnections = () => {
@@ -214,7 +76,6 @@ export class AppService {
     return this.connections
       .fetch({ map: 1 })
       .pipe(map((val) => val.data.connections as Connection[]));
-    // return of(this.testConnections).pipe(map((val) => val.data.connections as Connection[]));
   }
 
   createConnection = (mapId: number, source: string, target: string) => {

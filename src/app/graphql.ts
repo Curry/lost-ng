@@ -113,6 +113,7 @@ export type Mutation = {
   addNode: Node;
   moveNode: Node;
   deleteNode: Node;
+  deleteNodeBySystem: Node;
 };
 
 
@@ -155,6 +156,11 @@ export type MutationMoveNodeArgs = {
 
 export type MutationDeleteNodeArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationDeleteNodeBySystemArgs = {
+  systemId: Scalars['Float'];
 };
 
 export type Node = {
@@ -385,13 +391,13 @@ export type AddNodeMutation = (
 );
 
 export type DeleteNodeMutationVariables = {
-  id: Scalars['String'];
+  systemId: Scalars['Float'];
 };
 
 
 export type DeleteNodeMutation = (
   { __typename?: 'Mutation' }
-  & { deleteNode: (
+  & { deleteNodeBySystem: (
     { __typename?: 'Node' }
     & Pick<Node, 'id'>
   ) }
@@ -633,8 +639,8 @@ export const AddNodeDocument = gql`
     
   }
 export const DeleteNodeDocument = gql`
-    mutation DeleteNode($id: String!) {
-  deleteNode(id: $id) {
+    mutation DeleteNode($systemId: Float!) {
+  deleteNodeBySystem(systemId: $systemId) {
     id
   }
 }

@@ -1,12 +1,5 @@
-import { Node } from 'src/app/graphql';
-
 export namespace NodeActions {
   export class Add {
-    static readonly type = '[Node] Add Node';
-    constructor(public node: Node) {}
-  }
-
-  export class Create {
     static readonly type = '[Node] Create Node';
     constructor(public mapId: number, public systemId: number) {}
   }
@@ -18,6 +11,11 @@ export namespace NodeActions {
   export class Move {
     static readonly type = '[Node] Move Node';
     constructor(public id: string, public posX: number, public posY: number) {}
+  }
+
+  export class Remove {
+    static readonly type = '[Node] Remove Node';
+    constructor(public systemId: number) {}
   }
 }
 

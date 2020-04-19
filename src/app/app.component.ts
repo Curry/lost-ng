@@ -53,25 +53,12 @@ export class AppComponent implements OnInit {
   }
 
   addNode() {
-    this.store.dispatch(new NodeActions.Add({
-      id: 'potato',
-      mapId: 1,
-      systemId: 31000718,
-      posX: 190,
-      posY: 70,
-      system: {
-        id: 31000718,
-        systemName: 'potato',
-        trueSec: 0,
-        class: null,
-        statics: []
-      }
-    }));
+    this.store.dispatch(new NodeActions.Add(1, 31000060));
   }
 
-  // deleteNode() {
-  //   this.ser.remove('potato');
-  // }
+  deleteNode() {
+    this.store.dispatch(new NodeActions.Remove(31000060));
+  }
 
   undo() {
     this.store.dispatch(Undo);

@@ -109,8 +109,8 @@ mutation AddNode($map: Float!, $system: Float!) {
   }
 }
 
-mutation DeleteNode($id: String!) {
-  deleteNode(id: $id) {
+mutation DeleteNode($systemId: Float!) {
+  deleteNodeBySystem(systemId: $systemId) {
     id
   }
 }

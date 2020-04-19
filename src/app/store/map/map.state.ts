@@ -4,50 +4,28 @@ import {
   Action,
   StateContext,
   Selector,
-  NgxsOnChanges,
-  NgxsSimpleChange,
 } from '@ngxs/store';
 import { Node, Connection } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
-import { NodeActions, ConnectionActions, Undo, Redo } from './map.actions';
-import produce, { enablePatches, Patch, applyPatches } from 'immer';
+import { NodeActions, ConnectionActions } from './map.actions';
+import { produce } from 'immer';
 import { tap } from 'rxjs/operators';
-
 
 export interface MapEntityModel {
   nodes: { [id: string]: Node };
   connections: { [id: string]: Connection };
 }
 
-interface Patches {
-  patches: Patch[];
-  inversePatches: Patch[];
-}
-
-interface History {
-  undone: Patches[];
-  undoable: Patches[];
-}
-
 @State<MapEntityModel>({
   name: 'nodes',
   defaults: {
     nodes: {},
-    connections: {},
+    connections: {}
   },
 })
 @Injectable()
-export class MapState implements NgxsOnChanges {
-  private history: History;
-  private ignore = false;
-
-  constructor(private service: AppService) {
-    this.history = {
-      undoable: [],
-      undone: [],
-    };
-    enablePatches();
-  }
+export class MapState {
+  constructor(private service: AppService) {}
 
   @Selector()
   static nodes(state: MapEntityModel) {
@@ -57,31 +35,6 @@ export class MapState implements NgxsOnChanges {
   @Selector()
   static connections(state: MapEntityModel) {
     return Object.values(state.connections);
-  }
-
-  ngxsOnChanges(change: NgxsSimpleChange<MapEntityModel>) {
-    produce(
-      change.previousValue,
-      (draft) => {
-        if (draft) {
-          draft.connections = change.currentValue.connections;
-          draft.nodes = change.currentValue.nodes;
-        }
-      },
-      (patches, inversePatches) => {
-        if (
-          !this.ignore &&
-          Object.keys(change.previousValue.connections).length > 0 &&
-          Object.keys(change.previousValue.nodes).length > 0
-        ) {
-          this.history = produce(this.history, (draft) => {
-            draft.undoable.unshift({ patches, inversePatches });
-            draft.undone = [];
-          });
-        }
-        this.ignore = false;
-      }
-    );
   }
 
   @Action(NodeActions.Load)
@@ -113,13 +66,26 @@ export class MapState implements NgxsOnChanges {
     );
   }
 
-  @Action(NodeActions.Create)
-  createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Create) {
+  @Action(NodeActions.Add)
+  createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
     return this.service.createNode(action.mapId, action.systemId).pipe(
       tap((val) => {
         ctx.setState(
           produce((draft: MapEntityModel) => {
             draft.nodes[val.id] = val;
+          })
+        );
+      })
+    );
+  }
+
+  @Action(NodeActions.Remove)
+  removeNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Remove) {
+    return this.service.removeNode(action.systemId).pipe(
+      tap(val => {
+        ctx.setState(
+          produce((draft: MapEntityModel) => {
+            delete draft.nodes[val];
           })
         );
       })
@@ -171,31 +137,5 @@ export class MapState implements NgxsOnChanges {
         );
       })
     );
-  }
-
-  @Action(Undo)
-  undo(ctx: StateContext<MapEntityModel>) {
-    if (this.history.undoable.length > 0) {
-      this.ignore = true;
-      const lastPatches = this.history.undoable[0];
-      this.history = produce(this.history, (draft) => {
-        draft.undone.unshift(lastPatches);
-        draft.undoable.shift();
-      });
-      ctx.setState((state) => applyPatches(state, lastPatches.inversePatches));
-    }
-  }
-
-  @Action(Redo)
-  redo(ctx: StateContext<MapEntityModel>) {
-    if (this.history.undone.length > 0) {
-      this.ignore = true;
-      const nextPatches = this.history.undone[0];
-      this.history = produce(this.history, (draft) => {
-        draft.undoable.unshift(nextPatches);
-        draft.undone.shift();
-      });
-      ctx.setState((state) => applyPatches(state, nextPatches.patches));
-    }
   }
 }
