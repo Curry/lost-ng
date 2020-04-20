@@ -84,23 +84,30 @@ export class MapState {
   }
 
   @Action(NodeActions.Add)
-  createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
+  addNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
     return this.service.createNode(action.mapId, action.systemId).pipe(
       tap((val) => {
-        this.changeState(ctx, (draft) => {
-          draft.nodes[val.id] = val;
-        });
+        ctx.dispatch(new NodeActions.Create(val));
       })
     );
+  }
+
+  @Action(NodeActions.Create)
+  createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Create) {
+    if (!ctx.getState().nodes[action.node.id]) {
+      this.changeState(ctx, (draft) => {
+        draft.nodes[action.node.id] = action.node;
+      });
+    }
   }
 
   @Action(NodeActions.Remove)
   removeNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Remove) {
     return this.service.removeNode(action.systemId).pipe(
-      tap(({node, connections}) => {
+      tap(({ node, connections }) => {
         this.changeState(ctx, (draft) => {
           delete draft.nodes[node];
-          connections.forEach(conn => {
+          connections.forEach((conn) => {
             delete draft.connections[conn];
           });
         });
@@ -130,11 +137,21 @@ export class MapState {
   ) {
     return this.service.createConnection(1, action.source, action.target).pipe(
       tap((conn) => {
-        this.changeState(ctx, (draft) => {
-          draft.connections[conn.id] = conn;
-        });
+        ctx.dispatch(new ConnectionActions.Create(conn));
       })
     );
+  }
+
+  @Action(ConnectionActions.Create)
+  createConnection(
+    ctx: StateContext<MapEntityModel>,
+    action: ConnectionActions.Create
+  ) {
+    if (!ctx.getState().connections[action.connection.id]) {
+      this.changeState(ctx, (draft) => {
+        draft.connections[action.connection.id] = action.connection;
+      });
+    }
   }
 
   @Action(ConnectionActions.Remove)

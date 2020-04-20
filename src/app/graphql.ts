@@ -109,7 +109,7 @@ export type Mutation = {
   addCorporation: Corporation;
   addConnection: Connection;
   removeConnection: Connection;
-  removeConnectionsByNode: Array<Connection>;
+  removeConnectionsByNode?: Maybe<Array<Connection>>;
   addNode: Node;
   moveNode: Node;
   deleteNode: Node;
@@ -266,22 +266,22 @@ export type Ship = {
   alias?: Maybe<Scalars['String']>;
 };
 
+export type StateChange = {
+   __typename?: 'StateChange';
+  type: Scalars['String'];
+  node?: Maybe<Node>;
+  connection?: Maybe<Connection>;
+};
+
 export type Subscription = {
    __typename?: 'Subscription';
+  subscribe: StateChange;
   corpChanged: Corporation;
-  connectionAdded: Connection;
-  connectionRemoved: Scalars['String'];
-  nodeAdded: Node;
 };
 
 
-export type SubscriptionConnectionAddedArgs = {
-  map: Scalars['Float'];
-};
-
-
-export type SubscriptionNodeAddedArgs = {
-  map: Scalars['Float'];
+export type SubscriptionSubscribeArgs = {
+  mapId: Scalars['Float'];
 };
 
 export type System = {
@@ -440,10 +440,10 @@ export type DeleteConnectionByNodeMutationVariables = {
 
 export type DeleteConnectionByNodeMutation = (
   { __typename?: 'Mutation' }
-  & { removeConnectionsByNode: Array<(
+  & { removeConnectionsByNode?: Maybe<Array<(
     { __typename?: 'Connection' }
     & Pick<Connection, 'id'>
-  )> }
+  )>> }
 );
 
 export type MoveNodeMutationVariables = {
@@ -461,37 +461,31 @@ export type MoveNodeMutation = (
   ) }
 );
 
-export type WatchNodesSubscriptionVariables = {
-  map: Scalars['Float'];
+export type WatchSubscriptionVariables = {
+  mapId: Scalars['Float'];
 };
 
 
-export type WatchNodesSubscription = (
+export type WatchSubscription = (
   { __typename?: 'Subscription' }
-  & { nodeAdded: (
-    { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId'>
-    & { system: (
-      { __typename?: 'System' }
-      & Pick<System, 'id' | 'systemName' | 'class' | 'trueSec'>
-      & { statics: Array<(
-        { __typename?: 'Wormhole' }
-        & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass'>
-      )> }
-    ) }
-  ) }
-);
-
-export type WatchConnectionsSubscriptionVariables = {
-  map: Scalars['Float'];
-};
-
-
-export type WatchConnectionsSubscription = (
-  { __typename?: 'Subscription' }
-  & { connectionAdded: (
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
+  & { subscribe: (
+    { __typename?: 'StateChange' }
+    & Pick<StateChange, 'type'>
+    & { node?: Maybe<(
+      { __typename?: 'Node' }
+      & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY'>
+      & { system: (
+        { __typename?: 'System' }
+        & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
+        & { statics: Array<(
+          { __typename?: 'Wormhole' }
+          & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
+        )> }
+      ) }
+    )>, connection?: Maybe<(
+      { __typename?: 'Connection' }
+      & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
+    )> }
   ) }
 );
 
@@ -723,26 +717,44 @@ export const MoveNodeDocument = gql`
     document = MoveNodeDocument;
     
   }
-export const WatchNodesDocument = gql`
-    subscription WatchNodes($map: Float!) {
-  nodeAdded(map: $map) {
-    id
-    mapId
-    system {
+export const WatchDocument = gql`
+    subscription Watch($mapId: Float!) {
+  subscribe(mapId: $mapId) {
+    type
+    node {
       id
-      systemName
-      class
-      trueSec
-      statics {
+      mapId
+      alias
+      posX
+      posY
+      system {
         id
-        name
-        sourceClasses
-        targetClass
-        lifetime
-        maxMass
-        massRegen
-        maxOnePass
+        regionId
+        constellationId
+        systemName
+        class
+        effect
+        trueSec
+        statics {
+          id
+          name
+          sourceClasses
+          targetClass
+          lifetime
+          maxMass
+          massRegen
+          maxOnePass
+          scanStrength
+        }
       }
+    }
+    connection {
+      id
+      mapId
+      source
+      target
+      createdAt
+      updatedAt
     }
   }
 }
@@ -751,27 +763,7 @@ export const WatchNodesDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class WatchNodesGQL extends Apollo.Subscription<WatchNodesSubscription, WatchNodesSubscriptionVariables> {
-    document = WatchNodesDocument;
-    
-  }
-export const WatchConnectionsDocument = gql`
-    subscription WatchConnections($map: Float!) {
-  connectionAdded(map: $map) {
-    id
-    mapId
-    source
-    target
-    createdAt
-    updatedAt
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class WatchConnectionsGQL extends Apollo.Subscription<WatchConnectionsSubscription, WatchConnectionsSubscriptionVariables> {
-    document = WatchConnectionsDocument;
+  export class WatchGQL extends Apollo.Subscription<WatchSubscription, WatchSubscriptionVariables> {
+    document = WatchDocument;
     
   }

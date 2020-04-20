@@ -8,6 +8,7 @@ import { Select } from '@ngxs/store';
 import { MapState } from './store/map/map.state';
 import { ConnectionActions, NodeActions, Undo, Redo } from './store/map/map.actions';
 import { NodeState } from './store/node/node.state';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
   constructor(
     private store: Store,
     private service: NodeService,
+    private appService: AppService,
     private state: NodeState,
   ) {
     this.jsPlumbInstance = this.service.jsPlumbInstance;
@@ -51,6 +53,10 @@ export class AppComponent implements OnInit {
       if (event) {
         this.store.dispatch(new ConnectionActions.Remove(info.sourceId, info.targetId));
       }
+    });
+    this.appService.watchMap(1).subscribe(val => {
+      console.log(val);
+      this.store.dispatch(val);
     });
   }
 

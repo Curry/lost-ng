@@ -10,6 +10,7 @@ import {
   DeleteNodeGQL,
   RemoveConnectionGQL,
   DeleteConnectionByNodeGQL,
+  WatchGQL,
 } from './graphql';
 import { map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -28,7 +29,8 @@ export class AppService {
     private addNode: AddNodeGQL,
     private deleteNode: DeleteNodeGQL,
     private deleteConnectionByNode: DeleteConnectionByNodeGQL,
-    private deleteConnection: RemoveConnectionGQL
+    private deleteConnection: RemoveConnectionGQL,
+    private watch: WatchGQL
   ) {}
 
   getNodes = () => {
@@ -41,6 +43,7 @@ export class AppService {
   }
 
   createNode = (mapId: number, system: number) => {
+    console.log('here');
     return this.addNode
       .mutate({ map: mapId, system })
       .pipe(map((val) => val.data.addNode));
@@ -59,7 +62,7 @@ export class AppService {
         (val) => this.removeConnectionByNode(val.id),
         (val1, val2) => ({
           node: val1.id,
-          connections: val2.map(conn => conn.id)
+          connections: (val2 || []).map((conn) => conn.id),
         })
       )
     );
@@ -97,4 +100,13 @@ export class AppService {
       .mutate({ map: 1, source, target })
       .pipe(map((val) => val.data.removeConnection));
   }
+
+  watchMap = (mapId: number) =>
+    this.watch.subscribe({ mapId }).pipe(
+      map((val) => ({
+        type: val.data.subscribe.type,
+        node: val.data.subscribe.node,
+        connection: val.data.subscribe.connection
+      }))
+    )
 }

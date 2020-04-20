@@ -146,36 +146,43 @@ mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {
   }
 }
 
-subscription WatchNodes($map: Float!) {
-  nodeAdded(map: $map) {
-    id
-    mapId
-    system {
+subscription Watch($mapId: Float!) {
+  subscribe(mapId: $mapId) {
+    type
+    node {
       id
-      systemName
-      class
-      trueSec
-      statics {
+      mapId
+      alias
+      posX
+      posY
+      system {
         id
-        name
-        sourceClasses
-        targetClass
-        lifetime
-        maxMass
-        massRegen
-        maxOnePass
+        regionId
+        constellationId
+        systemName
+        class
+        effect
+        trueSec
+        statics {
+          id
+          name
+          sourceClasses
+          targetClass
+          lifetime
+          maxMass
+          massRegen
+          maxOnePass
+          scanStrength
+        }
       }
     }
-  }
-}
-
-subscription WatchConnections($map: Float!) {
-  connectionAdded(map: $map) {
-    id
-    mapId
-    source
-    target
-    createdAt
-    updatedAt
+    connection {
+      id
+      mapId
+      source
+      target
+      createdAt
+      updatedAt
+    }
   }
 }

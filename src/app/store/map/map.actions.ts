@@ -1,7 +1,14 @@
+import { Node, Connection } from 'src/app/graphql';
+
 export namespace NodeActions {
   export class Add {
-    static readonly type = '[Node] Create Node';
+    static readonly type = '[Node] Add Node';
     constructor(public mapId: number, public systemId: number) {}
+  }
+
+  export class Create {
+    static readonly type = '[Node] Create Node';
+    constructor(public node: Node) {}
   }
 
   export class Load {
@@ -27,6 +34,11 @@ export namespace ConnectionActions {
   export class Add {
     static readonly type = '[Connection] Add Connection';
     constructor(public source: string, public target: string) {}
+  }
+
+  export class Create {
+    static readonly type = '[Connection] Create Connection';
+    constructor(public connection: Connection) {}
   }
 
   export class Remove {
