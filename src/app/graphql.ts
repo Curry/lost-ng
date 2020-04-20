@@ -109,7 +109,7 @@ export type Mutation = {
   addCorporation: Corporation;
   addConnection: Connection;
   removeConnection: Connection;
-  removeConnectionsByNode?: Maybe<Scalars['Boolean']>;
+  removeConnectionsByNode: Array<Connection>;
   addNode: Node;
   moveNode: Node;
   deleteNode: Node;
@@ -440,7 +440,10 @@ export type DeleteConnectionByNodeMutationVariables = {
 
 export type DeleteConnectionByNodeMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'removeConnectionsByNode'>
+  & { removeConnectionsByNode: Array<(
+    { __typename?: 'Connection' }
+    & Pick<Connection, 'id'>
+  )> }
 );
 
 export type MoveNodeMutationVariables = {
@@ -690,7 +693,9 @@ export const RemoveConnectionDocument = gql`
   }
 export const DeleteConnectionByNodeDocument = gql`
     mutation DeleteConnectionByNode($nodeId: String!) {
-  removeConnectionsByNode(nodeId: $nodeId)
+  removeConnectionsByNode(nodeId: $nodeId) {
+    id
+  }
 }
     `;
 

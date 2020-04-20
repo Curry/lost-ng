@@ -133,7 +133,9 @@ mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
 }
 
 mutation DeleteConnectionByNode($nodeId: String!) {
-  removeConnectionsByNode(nodeId: $nodeId)
+  removeConnectionsByNode(nodeId: $nodeId) {
+    id
+  }
 }
 
 mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {

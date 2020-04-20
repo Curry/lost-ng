@@ -7,6 +7,7 @@ import { Store } from '@ngxs/store';
 import { Select } from '@ngxs/store';
 import { MapState } from './store/map/map.state';
 import { ConnectionActions, NodeActions, Undo, Redo } from './store/map/map.actions';
+import { NodeState } from './store/node/node.state';
 
 @Component({
   selector: 'app-root',
@@ -22,10 +23,10 @@ export class AppComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    if (event.ctrlKey && event.keyCode === 90) {
+    if (event.ctrlKey && event.key === 'z') {
       this.undo();
     }
-    if (event.ctrlKey && event.shiftKey && event.keyCode === 90) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'z') {
       this.redo();
     }
   }
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit {
   constructor(
     private store: Store,
     private service: NodeService,
+    private state: NodeState,
   ) {
     this.jsPlumbInstance = this.service.jsPlumbInstance;
   }

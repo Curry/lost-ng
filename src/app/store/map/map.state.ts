@@ -1,31 +1,50 @@
 import { Injectable } from '@angular/core';
-import {
-  State,
-  Action,
-  StateContext,
-  Selector,
-} from '@ngxs/store';
+import { State, Action, StateContext, Selector } from '@ngxs/store';
 import { Node, Connection } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
-import { NodeActions, ConnectionActions } from './map.actions';
-import { produce } from 'immer';
+import { NodeActions, ConnectionActions, Undo, Redo } from './map.actions';
+import {
+  produce,
+  Patch,
+  enablePatches,
+  applyPatches,
+  produceWithPatches,
+  Draft,
+} from 'immer';
 import { tap } from 'rxjs/operators';
 
 export interface MapEntityModel {
   nodes: { [id: string]: Node };
   connections: { [id: string]: Connection };
+  history?: History;
+}
+
+interface Patches {
+  patches: Patch[];
+  inversePatches: Patch[];
+}
+
+interface History {
+  undone: Patches[];
+  undoable: Patches[];
 }
 
 @State<MapEntityModel>({
-  name: 'nodes',
+  name: 'map',
   defaults: {
     nodes: {},
-    connections: {}
+    connections: {},
+    history: {
+      undone: [],
+      undoable: [],
+    },
   },
 })
 @Injectable()
 export class MapState {
-  constructor(private service: AppService) {}
+  constructor(private service: AppService) {
+    enablePatches();
+  }
 
   @Selector()
   static nodes(state: MapEntityModel) {
@@ -43,7 +62,7 @@ export class MapState {
       tap((nodes) => {
         ctx.setState(
           produce((draft: MapEntityModel) => {
-            nodes.forEach(node => {
+            nodes.forEach((node) => {
               draft.nodes[node.id] = node;
             });
           })
@@ -56,12 +75,10 @@ export class MapState {
   moveNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Move) {
     return this.service.moveNode(action.id, action.posX, action.posY).pipe(
       tap((val) => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
-            draft.nodes[val.id].posX = val.posX;
-            draft.nodes[val.id].posY = val.posY;
-          })
-        );
+        this.changeState(ctx, (draft) => {
+          draft.nodes[val.id].posX = val.posX;
+          draft.nodes[val.id].posY = val.posY;
+        });
       })
     );
   }
@@ -70,11 +87,9 @@ export class MapState {
   createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
     return this.service.createNode(action.mapId, action.systemId).pipe(
       tap((val) => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
-            draft.nodes[val.id] = val;
-          })
-        );
+        this.changeState(ctx, (draft) => {
+          draft.nodes[val.id] = val;
+        });
       })
     );
   }
@@ -82,12 +97,13 @@ export class MapState {
   @Action(NodeActions.Remove)
   removeNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Remove) {
     return this.service.removeNode(action.systemId).pipe(
-      tap(val => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
-            delete draft.nodes[val];
-          })
-        );
+      tap(({node, connections}) => {
+        this.changeState(ctx, (draft) => {
+          delete draft.nodes[node];
+          connections.forEach(conn => {
+            delete draft.connections[conn];
+          });
+        });
       })
     );
   }
@@ -98,7 +114,7 @@ export class MapState {
       tap((connections) => {
         ctx.setState(
           produce((draft: MapEntityModel) => {
-            connections.forEach(conn => {
+            connections.forEach((conn) => {
               draft.connections[conn.id] = conn;
             });
           })
@@ -114,11 +130,9 @@ export class MapState {
   ) {
     return this.service.createConnection(1, action.source, action.target).pipe(
       tap((conn) => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
-            draft.connections[conn.id] = conn;
-          })
-        );
+        this.changeState(ctx, (draft) => {
+          draft.connections[conn.id] = conn;
+        });
       })
     );
   }
@@ -129,13 +143,55 @@ export class MapState {
     action: ConnectionActions.Remove
   ) {
     return this.service.removeConnection(action.source, action.target).pipe(
-      tap(val => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
-            delete draft.connections[val.id];
-          })
-        );
+      tap((val) => {
+        this.changeState(ctx, (draft: MapEntityModel) => {
+          delete draft.connections[val.id];
+        });
       })
     );
+  }
+
+  private changeState = (
+    ctx: StateContext<MapEntityModel>,
+    produceFn: (draft: Draft<MapEntityModel>) => void
+  ): void => {
+    const [newState, patches, inversePatches] = produceWithPatches(
+      ctx.getState(),
+      produceFn
+    );
+    ctx.setState(
+      produce(newState, (draft) => {
+        draft.history.undoable.unshift({ patches, inversePatches });
+        draft.history.undone = [];
+      })
+    );
+  }
+
+  @Action(Undo)
+  undo(ctx: StateContext<MapEntityModel>) {
+    if (ctx.getState().history.undoable.length > 0) {
+      ctx.setState((state) =>
+        applyPatches(
+          produce(state, (draft) => {
+            draft.history.undone.unshift(draft.history.undoable.shift());
+          }),
+          state.history.undoable[0].inversePatches
+        )
+      );
+    }
+  }
+
+  @Action(Redo)
+  redo(ctx: StateContext<MapEntityModel>) {
+    if (ctx.getState().history.undone.length > 0) {
+      ctx.setState((state) =>
+        applyPatches(
+          produce(state, (draft) => {
+            draft.history.undoable.unshift(draft.history.undone.shift());
+          }),
+          state.history.undone[0].patches
+        )
+      );
+    }
   }
 }

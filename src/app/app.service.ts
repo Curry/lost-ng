@@ -41,9 +41,9 @@ export class AppService {
   }
 
   createNode = (mapId: number, system: number) => {
-    return this.addNode.mutate({ map: mapId, system }).pipe(
-      map(val => val.data.addNode)
-    );
+    return this.addNode
+      .mutate({ map: mapId, system })
+      .pipe(map((val) => val.data.addNode));
   }
 
   moveNode = (id: string, posX: number, posY: number) => {
@@ -53,18 +53,22 @@ export class AppService {
   }
 
   removeNode = (systemId: number) => {
-    return this.deleteNode
-      .mutate({ systemId })
-      .pipe(
-        map(val => val.data.deleteNodeBySystem),
-        mergeMap((val) => this.removeConnectionByNode(val.id))
-      );
+    return this.deleteNode.mutate({ systemId }).pipe(
+      map((val) => val.data.deleteNodeBySystem),
+      mergeMap(
+        (val) => this.removeConnectionByNode(val.id),
+        (val1, val2) => ({
+          node: val1.id,
+          connections: val2.map(conn => conn.id)
+        })
+      )
+    );
   }
 
   removeConnectionByNode = (nodeId: string) => {
-    return this.deleteConnectionByNode.mutate({ nodeId }).pipe(
-      map(() => nodeId)
-    );
+    return this.deleteConnectionByNode
+      .mutate({ nodeId })
+      .pipe(map((val) => val.data.removeConnectionsByNode));
   }
 
   getConnections = () => {
@@ -89,8 +93,8 @@ export class AppService {
   }
 
   removeConnection = (source: string, target: string) => {
-    return this.deleteConnection.mutate({ map: 1, source, target }).pipe(
-      map(val => val.data.removeConnection)
-    );
+    return this.deleteConnection
+      .mutate({ map: 1, source, target })
+      .pipe(map((val) => val.data.removeConnection));
   }
 }
