@@ -23,7 +23,7 @@ export class NodeService {
 
   setRootViewContainerRef = (viewContainerRef: ViewContainerRef) => {
     this.rootViewContainer = viewContainerRef;
-  }
+  };
 
   resetConnections = () => this.jsPlumbInstance.deleteEveryConnection();
 
@@ -32,13 +32,15 @@ export class NodeService {
       this.addNode(node);
       // this.jsPlumbInstance.revalidate(node.id);
     });
-  }
+  };
 
   addNode = (node: Node) => {
     if (this.components[node.id]) {
       this.components[node.id].instance.node = node;
     } else {
-      const factory = this.factoryResolver.resolveComponentFactory(NodeComponent);
+      const factory = this.factoryResolver.resolveComponentFactory(
+        NodeComponent
+      );
       const component = factory.create(this.rootViewContainer.injector);
       component.instance.node = node;
       component.instance.jsPlumbInstance = this.jsPlumbInstance;
@@ -48,22 +50,22 @@ export class NodeService {
       this.rootViewContainer.insert(component.hostView);
       this.components[node.id] = component;
     }
-  }
+  };
 
   removeNodes = (nodes: Node[]) => {
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       this.components[node.id].destroy();
       delete this.components[node.id];
     });
-  }
+  };
 
   revalidate = (nodes: Node[]) => {
-    nodes.forEach(node => this.jsPlumbInstance.revalidate(node.id));
-  }
+    nodes.forEach((node) => this.jsPlumbInstance.revalidate(node.id));
+  };
 
   addConnections = (connections: Connection[]) => {
     connections.forEach((connection) => this.addConnection(connection));
-  }
+  };
 
   addConnection(connection: Connection) {
     if (
@@ -80,8 +82,8 @@ export class NodeService {
   }
 
   removeConnections = (connections: Connection[]) => {
-    connections.forEach(connection => this.removeConnection(connection));
-  }
+    connections.forEach((connection) => this.removeConnection(connection));
+  };
 
   removeConnection(connection: Connection) {
     this.jsPlumbInstance

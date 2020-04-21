@@ -3,10 +3,10 @@ import { jsPlumbInstance } from 'jsplumb';
 import { Node } from '../graphql';
 import { timer } from 'rxjs';
 import { Store } from '@ngxs/store';
-import { NodeActions } from '../store/map/map.actions';
+import * as NodeActions from '../store/map/node.actions';
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'node',
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.scss'],
@@ -49,17 +49,19 @@ export class NodeComponent implements AfterViewInit {
     const { id } = this.node;
     this.jsPlumbInstance.addEndpoint(
       id,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       { anchor: 'Right', uuid: id + '_bottom' },
       Endpoint1
     );
     this.jsPlumbInstance.addEndpoint(
       id,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       { anchor: 'Left', uuid: id + '_top' },
       Endpoint2
     );
-  }
+  };
 
   ngAfterViewInit() {
     const { id } = this.node;
@@ -79,5 +81,5 @@ export class NodeComponent implements AfterViewInit {
 
   onClick = () => {
     console.log(this.clickable);
-  }
+  };
 }

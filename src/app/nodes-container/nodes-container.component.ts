@@ -12,7 +12,7 @@ import { Connection, Node } from '../graphql';
 import { NodeService } from '../node.service';
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'nodes-container',
   templateUrl: './nodes-container.component.html',
   styleUrls: ['./nodes-container.component.scss'],
@@ -34,11 +34,17 @@ export class NodesContainerComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.nodes) {
       const prev = changes.nodes.previousValue || [];
-      this.nodeService.removeNodes(prev.filter((n: Node) => !this.nodes.map(no => no.id).includes(n.id)));
+      this.nodeService.removeNodes(
+        prev.filter((n: Node) => !this.nodes.map((no) => no.id).includes(n.id))
+      );
     }
     if (changes.connections) {
       const prev = changes.connections.previousValue || [];
-      this.nodeService.removeConnections(prev.filter((c: Connection) => !this.connections.map(co => co.id).includes(c.id)));
+      this.nodeService.removeConnections(
+        prev.filter(
+          (c: Connection) => !this.connections.map((co) => co.id).includes(c.id)
+        )
+      );
     }
     this.nodeService.addNodes(this.nodes);
     timer().subscribe(() => {

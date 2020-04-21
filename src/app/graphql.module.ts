@@ -17,7 +17,8 @@ import { OperationDefinitionNode } from 'graphql';
           cache: new InMemoryCache(),
           link: split(
             ({ query }) =>
-              (getMainDefinition(query) as OperationDefinitionNode).operation === 'subscription',
+              (getMainDefinition(query) as OperationDefinitionNode)
+                .operation === 'subscription',
             new WebSocketLink({
               uri: 'ws://localhost:3000/graphql',
               options: {

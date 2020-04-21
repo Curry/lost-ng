@@ -2,14 +2,10 @@ import { Injectable } from '@angular/core';
 import { State, Action, StateContext, Selector } from '@ngxs/store';
 import { Node, Connection } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
-import {
-  NodeActions,
-  ConnectionActions,
-  Undo,
-  Redo,
-  Watch,
-  SocketActions,
-} from './map.actions';
+import * as MapActions from './map.actions';
+import * as NodeActions from './node.actions';
+import * as ConnectionActions from './connection.actions';
+import * as SocketActions from './socket.actions';
 import {
   produce,
   Patch,
@@ -23,7 +19,7 @@ import { tap } from 'rxjs/operators';
 export interface MapEntityModel {
   nodes: { [id: string]: Node };
   connections: { [id: string]: Connection };
-  history?: History;
+  history: History;
 }
 
 interface Patches {
@@ -62,6 +58,16 @@ export class MapState {
   @Selector()
   static connections(state: MapEntityModel) {
     return Object.values(state.connections);
+  }
+
+  @Selector()
+  static undoDisabled(state: MapEntityModel) {
+    return state.history.undoable.length === 0;
+  }
+
+  @Selector()
+  static redoDisabled(state: MapEntityModel) {
+    return state.history.undone.length === 0;
   }
 
   @Action(NodeActions.Load)
@@ -238,7 +244,7 @@ export class MapState {
     );
   }
 
-  @Action(Watch)
+  @Action(MapActions.Watch)
   watch(ctx: StateContext<MapEntityModel>) {
     return this.service.watchMap(1).pipe(
       tap((val) => {
@@ -249,7 +255,7 @@ export class MapState {
     );
   }
 
-  @Action(Undo)
+  @Action(MapActions.Undo)
   undo(ctx: StateContext<MapEntityModel>) {
     if (ctx.getState().history.undoable.length > 0) {
       ctx.setState((state) =>
@@ -263,7 +269,7 @@ export class MapState {
     }
   }
 
-  @Action(Redo)
+  @Action(MapActions.Redo)
   redo(ctx: StateContext<MapEntityModel>) {
     if (ctx.getState().history.undone.length > 0) {
       ctx.setState((state) =>
@@ -291,5 +297,5 @@ export class MapState {
         draft.history.undone = [];
       })
     );
-  }
+  };
 }

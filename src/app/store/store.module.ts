@@ -12,8 +12,10 @@ import { MapPlugin } from './map/map.plugin';
   imports: [
     CommonModule,
     NgxsReduxDevtoolsPluginModule.forRoot({ disabled: env.production }),
-    NgxsModule.forRoot([MapState, NodeState], { developmentMode: !env.production }),
-    NgxsDataPluginModule.forRoot()
+    NgxsModule.forRoot([MapState, NodeState], {
+      developmentMode: !env.production,
+    }),
+    NgxsDataPluginModule.forRoot(),
   ],
   providers: [
     // {

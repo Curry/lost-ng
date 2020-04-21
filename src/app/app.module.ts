@@ -20,7 +20,7 @@ import { NgxsStoreModule } from './store/store.module';
     DragDropModule,
     MatButtonModule,
     MatCardModule,
-    NgxsStoreModule
+    NgxsStoreModule,
   ],
   declarations: [AppComponent, NodeComponent, NodesContainerComponent],
   entryComponents: [NodeComponent],

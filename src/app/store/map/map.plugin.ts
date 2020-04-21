@@ -3,7 +3,9 @@ import { NgxsPlugin } from '@ngxs/store';
 import { Patch, produce, applyPatches, enablePatches } from 'immer';
 import { getActionTypeFromInstance } from '@ngxs/store';
 import { tap } from 'rxjs/operators';
-import { Undo, Redo, NodeActions, ConnectionActions } from './map.actions';
+import * as MapActions from './map.actions';
+import * as NodeActions from './node.actions';
+import * as ConnectionActions from './connection.actions';
 
 interface Patches {
   patches: Patch[];
@@ -22,7 +24,7 @@ export class MapPlugin implements NgxsPlugin {
   constructor() {
     this.history = {
       undoable: [],
-      undone: []
+      undone: [],
     };
     enablePatches();
   }
@@ -31,7 +33,7 @@ export class MapPlugin implements NgxsPlugin {
     let newState = state;
     const actionType = getActionTypeFromInstance(action);
     switch (actionType) {
-      case Undo.type:
+      case MapActions.Undo.type:
         if (this.history.undoable.length > 0) {
           const lastPatches = this.history.undoable[0];
           this.history = produce(this.history, (draft) => {
@@ -41,7 +43,7 @@ export class MapPlugin implements NgxsPlugin {
           newState = applyPatches(state, lastPatches.inversePatches);
         }
         return next(newState, action);
-      case Redo.type:
+      case MapActions.Redo.type:
         if (this.history.undone.length > 0) {
           const nextPatches = this.history.undone[0];
           this.history = produce(this.history, (draft) => {
@@ -54,16 +56,23 @@ export class MapPlugin implements NgxsPlugin {
       default:
         return next(state, action).pipe(
           tap((actionState: any) => {
-            if (actionType !== NodeActions.Load.type && actionType !== ConnectionActions.Load.type) {
-              produce(state, (draft) => {
-                draft.connections = actionState.connections;
-                draft.nodes = actionState.nodes;
-              }, (patches, inversePatches) => {
-                this.history = produce(this.history, (draft) => {
-                  draft.undoable.unshift({ patches, inversePatches });
-                  draft.undone = [];
-                });
-              });
+            if (
+              actionType !== NodeActions.Load.type &&
+              actionType !== ConnectionActions.Load.type
+            ) {
+              produce(
+                state,
+                (draft) => {
+                  draft.connections = actionState.connections;
+                  draft.nodes = actionState.nodes;
+                },
+                (patches, inversePatches) => {
+                  this.history = produce(this.history, (draft) => {
+                    draft.undoable.unshift({ patches, inversePatches });
+                    draft.undone = [];
+                  });
+                }
+              );
             }
           })
         );
