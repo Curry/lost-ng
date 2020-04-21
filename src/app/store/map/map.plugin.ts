@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgxsPlugin } from '@ngxs/store';
 import { Patch, produce, applyPatches, enablePatches } from 'immer';
-import { MapEntityModel } from './map.state';
 import { getActionTypeFromInstance } from '@ngxs/store';
 import { tap } from 'rxjs/operators';
 import { Undo, Redo, NodeActions, ConnectionActions } from './map.actions';
@@ -54,7 +53,7 @@ export class MapPlugin implements NgxsPlugin {
         return next(newState, action);
       default:
         return next(state, action).pipe(
-          tap((actionState: MapEntityModel) => {
+          tap((actionState: any) => {
             if (actionType !== NodeActions.Load.type && actionType !== ConnectionActions.Load.type) {
               produce(state, (draft) => {
                 draft.connections = actionState.connections;

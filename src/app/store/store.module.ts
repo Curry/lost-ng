@@ -6,6 +6,7 @@ import { NgxsDataPluginModule } from '@ngxs-labs/data';
 import { environment as env } from '../../environments/environment';
 import { MapState } from './map/map.state';
 import { NodeState } from './node/node.state';
+import { MapPlugin } from './map/map.plugin';
 
 @NgModule({
   imports: [

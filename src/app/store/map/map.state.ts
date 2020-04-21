@@ -2,7 +2,14 @@ import { Injectable } from '@angular/core';
 import { State, Action, StateContext, Selector } from '@ngxs/store';
 import { Node, Connection } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
-import { NodeActions, ConnectionActions, Undo, Redo } from './map.actions';
+import {
+  NodeActions,
+  ConnectionActions,
+  Undo,
+  Redo,
+  Watch,
+  SocketActions,
+} from './map.actions';
 import {
   produce,
   Patch,
@@ -42,6 +49,7 @@ interface History {
 })
 @Injectable()
 export class MapState {
+  private ignoreSocket = false;
   constructor(private service: AppService) {
     enablePatches();
   }
@@ -71,50 +79,6 @@ export class MapState {
     );
   }
 
-  @Action(NodeActions.Move)
-  moveNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Move) {
-    return this.service.moveNode(action.id, action.posX, action.posY).pipe(
-      tap((val) => {
-        this.changeState(ctx, (draft) => {
-          draft.nodes[val.id].posX = val.posX;
-          draft.nodes[val.id].posY = val.posY;
-        });
-      })
-    );
-  }
-
-  @Action(NodeActions.Add)
-  addNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
-    return this.service.createNode(action.mapId, action.systemId).pipe(
-      tap((val) => {
-        ctx.dispatch(new NodeActions.Create(val));
-      })
-    );
-  }
-
-  @Action(NodeActions.Create)
-  createNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Create) {
-    if (!ctx.getState().nodes[action.node.id]) {
-      this.changeState(ctx, (draft) => {
-        draft.nodes[action.node.id] = action.node;
-      });
-    }
-  }
-
-  @Action(NodeActions.Remove)
-  removeNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Remove) {
-    return this.service.removeNode(action.systemId).pipe(
-      tap(({ node, connections }) => {
-        this.changeState(ctx, (draft) => {
-          delete draft.nodes[node];
-          connections.forEach((conn) => {
-            delete draft.connections[conn];
-          });
-        });
-      })
-    );
-  }
-
   @Action(ConnectionActions.Load)
   loadConnections(ctx: StateContext<MapEntityModel>) {
     return this.service.getConnections().pipe(
@@ -130,56 +94,157 @@ export class MapState {
     );
   }
 
+  @Action(NodeActions.Move)
+  moveNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Move) {
+    this.ignoreSocket = true;
+    return this.service.moveNode(action.id, action.posX, action.posY).pipe(
+      tap((val) => {
+        this.changeState(ctx, (draft) => {
+          draft.nodes[val.id].posX = val.posX;
+          draft.nodes[val.id].posY = val.posY;
+        });
+        this.ignoreSocket = false;
+      })
+    );
+  }
+
+  @Action(SocketActions.MoveNode)
+  socketMoveNode(
+    ctx: StateContext<MapEntityModel>,
+    { node: { id, posX, posY } }: SocketActions.MoveNode
+  ) {
+    ctx.setState((state) =>
+      produce(state, (draft) => {
+        draft.nodes[id].posX = posX;
+        draft.nodes[id].posY = posY;
+      })
+    );
+  }
+
+  @Action(NodeActions.Add)
+  addNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
+    this.ignoreSocket = true;
+    return this.service.createNode(action.mapId, action.systemId).pipe(
+      tap((node) => {
+        this.changeState(ctx, (draft) => {
+          if (!draft.nodes[node.id]) {
+            draft.nodes[node.id] = node;
+          }
+        });
+        this.ignoreSocket = false;
+      })
+    );
+  }
+
+  @Action(SocketActions.AddNode)
+  socketAddNode(
+    ctx: StateContext<MapEntityModel>,
+    action: SocketActions.AddNode
+  ) {
+    ctx.setState((state) =>
+      produce(state, (draft) => {
+        if (!draft.nodes[action.node.id]) {
+          draft.nodes[action.node.id] = action.node;
+        }
+      })
+    );
+  }
+
   @Action(ConnectionActions.Add)
   addConnection(
     ctx: StateContext<MapEntityModel>,
     action: ConnectionActions.Add
   ) {
+    this.ignoreSocket = true;
     return this.service.createConnection(1, action.source, action.target).pipe(
-      tap((conn) => {
-        ctx.dispatch(new ConnectionActions.Create(conn));
-      })
-    );
-  }
-
-  @Action(ConnectionActions.Create)
-  createConnection(
-    ctx: StateContext<MapEntityModel>,
-    action: ConnectionActions.Create
-  ) {
-    if (!ctx.getState().connections[action.connection.id]) {
-      this.changeState(ctx, (draft) => {
-        draft.connections[action.connection.id] = action.connection;
-      });
-    }
-  }
-
-  @Action(ConnectionActions.Remove)
-  removeConnection(
-    ctx: StateContext<MapEntityModel>,
-    action: ConnectionActions.Remove
-  ) {
-    return this.service.removeConnection(action.source, action.target).pipe(
-      tap((val) => {
-        this.changeState(ctx, (draft: MapEntityModel) => {
-          delete draft.connections[val.id];
+      tap((connection) => {
+        this.changeState(ctx, (draft) => {
+          if (!draft.connections[connection.id]) {
+            draft.connections[connection.id] = connection;
+          }
+          this.ignoreSocket = false;
         });
       })
     );
   }
 
-  private changeState = (
+  @Action(SocketActions.AddConnection)
+  socketAddConnection(
     ctx: StateContext<MapEntityModel>,
-    produceFn: (draft: Draft<MapEntityModel>) => void
-  ): void => {
-    const [newState, patches, inversePatches] = produceWithPatches(
-      ctx.getState(),
-      produceFn
+    action: SocketActions.AddConnection
+  ) {
+    ctx.setState((state) =>
+      produce(state, (draft) => {
+        if (!draft.connections[action.connection.id]) {
+          draft.connections[action.connection.id] = action.connection;
+        }
+      })
     );
-    ctx.setState(
-      produce(newState, (draft) => {
-        draft.history.undoable.unshift({ patches, inversePatches });
-        draft.history.undone = [];
+  }
+
+  @Action(NodeActions.Delete)
+  deleteNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Delete) {
+    this.ignoreSocket = true;
+    return this.service.removeNode(action.systemId).pipe(
+      tap(({ node, connections }) => {
+        this.changeState(ctx, (draft) => {
+          delete draft.nodes[node];
+          connections.forEach((conn) => {
+            delete draft.connections[conn];
+          });
+        });
+        this.ignoreSocket = false;
+      })
+    );
+  }
+
+  @Action(SocketActions.DeleteNode)
+  socketDeleteNode(
+    ctx: StateContext<MapEntityModel>,
+    action: SocketActions.DeleteNode
+  ) {
+    ctx.setState((state) =>
+      produce(state, (draft) => {
+        delete draft.nodes[action.node.id];
+      })
+    );
+  }
+
+  @Action(ConnectionActions.Delete)
+  deleteConnection(
+    ctx: StateContext<MapEntityModel>,
+    action: ConnectionActions.Delete
+  ) {
+    this.ignoreSocket = true;
+    return this.service.removeConnection(action.source, action.target).pipe(
+      tap((val) => {
+        this.changeState(ctx, (draft) => {
+          delete draft.connections[val.id];
+        });
+        this.ignoreSocket = false;
+      })
+    );
+  }
+
+  @Action(SocketActions.DeleteConnection)
+  socketDeleteConnection(
+    ctx: StateContext<MapEntityModel>,
+    action: SocketActions.DeleteConnection
+  ) {
+    ctx.setState((state) =>
+      produce(state, (draft) => {
+        delete draft.connections[action.connection.id];
+      })
+    );
+  }
+
+  @Action(Watch)
+  watch(ctx: StateContext<MapEntityModel>) {
+    return this.service.watchMap(1).pipe(
+      tap((val) => {
+        if (!this.ignoreSocket) {
+          ctx.dispatch(val);
+        }
       })
     );
   }
@@ -210,5 +275,21 @@ export class MapState {
         )
       );
     }
+  }
+
+  private changeState = (
+    ctx: StateContext<MapEntityModel>,
+    produceFn: (draft: Draft<MapEntityModel>) => void
+  ): void => {
+    const [newState, patches, inversePatches] = produceWithPatches(
+      ctx.getState(),
+      produceFn
+    );
+    ctx.setState(
+      produce(newState, (draft) => {
+        draft.history.undoable.unshift({ patches, inversePatches });
+        draft.history.undone = [];
+      })
+    );
   }
 }

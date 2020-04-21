@@ -39,45 +39,6 @@ query Connections($map: Float!) {
   }
 }
 
-query App($map: Float!) {
-  connections: connections(map: $map) {
-    id
-    mapId
-    source
-    target
-    createdAt
-    updatedAt
-  }
-
-  nodes: nodes(map: $map) {
-    id
-    mapId
-    alias
-    posX
-    posY
-    system {
-      id
-      regionId
-      constellationId
-      systemName
-      class
-      effect
-      trueSec
-      statics {
-        id
-        name
-        sourceClasses
-        targetClass
-        lifetime
-        maxMass
-        massRegen
-        maxOnePass
-        scanStrength
-      }
-    }
-  }
-}
-
 mutation AddNode($map: Float!, $system: Float!) {
   addNode(map: $map, system: $system) {
     id
@@ -109,7 +70,7 @@ mutation AddNode($map: Float!, $system: Float!) {
   }
 }
 
-mutation DeleteNode($systemId: Float!) {
+mutation RemoveNode($systemId: Float!) {
   deleteNodeBySystem(systemId: $systemId) {
     id
   }
@@ -126,13 +87,13 @@ mutation AddConnection($map: Float!, $source: String!, $target: String!) {
   }
 }
 
-mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
-  removeConnection(map: $map, source: $source, target: $target) {
+mutation RemoveConnection($source: String!, $target: String!) {
+  removeConnection(source: $source, target: $target) {
     id
   }
 }
 
-mutation DeleteConnectionByNode($nodeId: String!) {
+mutation RemoveConnectionByNode($nodeId: String!) {
   removeConnectionsByNode(nodeId: $nodeId) {
     id
   }

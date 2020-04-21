@@ -132,7 +132,6 @@ export type MutationAddConnectionArgs = {
 export type MutationRemoveConnectionArgs = {
   target: Scalars['String'];
   source: Scalars['String'];
-  map: Scalars['Float'];
 };
 
 
@@ -344,30 +343,6 @@ export type ConnectionsQuery = (
   )> }
 );
 
-export type AppQueryVariables = {
-  map: Scalars['Float'];
-};
-
-
-export type AppQuery = (
-  { __typename?: 'Query' }
-  & { connections: Array<(
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
-  )>, nodes: Array<(
-    { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY'>
-    & { system: (
-      { __typename?: 'System' }
-      & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
-      & { statics: Array<(
-        { __typename?: 'Wormhole' }
-        & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
-      )> }
-    ) }
-  )> }
-);
-
 export type AddNodeMutationVariables = {
   map: Scalars['Float'];
   system: Scalars['Float'];
@@ -390,12 +365,12 @@ export type AddNodeMutation = (
   ) }
 );
 
-export type DeleteNodeMutationVariables = {
+export type RemoveNodeMutationVariables = {
   systemId: Scalars['Float'];
 };
 
 
-export type DeleteNodeMutation = (
+export type RemoveNodeMutation = (
   { __typename?: 'Mutation' }
   & { deleteNodeBySystem: (
     { __typename?: 'Node' }
@@ -419,7 +394,6 @@ export type AddConnectionMutation = (
 );
 
 export type RemoveConnectionMutationVariables = {
-  map: Scalars['Float'];
   source: Scalars['String'];
   target: Scalars['String'];
 };
@@ -433,12 +407,12 @@ export type RemoveConnectionMutation = (
   ) }
 );
 
-export type DeleteConnectionByNodeMutationVariables = {
+export type RemoveConnectionByNodeMutationVariables = {
   nodeId: Scalars['String'];
 };
 
 
-export type DeleteConnectionByNodeMutation = (
+export type RemoveConnectionByNodeMutation = (
   { __typename?: 'Mutation' }
   & { removeConnectionsByNode?: Maybe<Array<(
     { __typename?: 'Connection' }
@@ -548,53 +522,6 @@ export const ConnectionsDocument = gql`
     document = ConnectionsDocument;
     
   }
-export const AppDocument = gql`
-    query App($map: Float!) {
-  connections: connections(map: $map) {
-    id
-    mapId
-    source
-    target
-    createdAt
-    updatedAt
-  }
-  nodes: nodes(map: $map) {
-    id
-    mapId
-    alias
-    posX
-    posY
-    system {
-      id
-      regionId
-      constellationId
-      systemName
-      class
-      effect
-      trueSec
-      statics {
-        id
-        name
-        sourceClasses
-        targetClass
-        lifetime
-        maxMass
-        massRegen
-        maxOnePass
-        scanStrength
-      }
-    }
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class AppGQL extends Apollo.Query<AppQuery, AppQueryVariables> {
-    document = AppDocument;
-    
-  }
 export const AddNodeDocument = gql`
     mutation AddNode($map: Float!, $system: Float!) {
   addNode(map: $map, system: $system) {
@@ -635,8 +562,8 @@ export const AddNodeDocument = gql`
     document = AddNodeDocument;
     
   }
-export const DeleteNodeDocument = gql`
-    mutation DeleteNode($systemId: Float!) {
+export const RemoveNodeDocument = gql`
+    mutation RemoveNode($systemId: Float!) {
   deleteNodeBySystem(systemId: $systemId) {
     id
   }
@@ -646,8 +573,8 @@ export const DeleteNodeDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class DeleteNodeGQL extends Apollo.Mutation<DeleteNodeMutation, DeleteNodeMutationVariables> {
-    document = DeleteNodeDocument;
+  export class RemoveNodeGQL extends Apollo.Mutation<RemoveNodeMutation, RemoveNodeMutationVariables> {
+    document = RemoveNodeDocument;
     
   }
 export const AddConnectionDocument = gql`
@@ -671,8 +598,8 @@ export const AddConnectionDocument = gql`
     
   }
 export const RemoveConnectionDocument = gql`
-    mutation RemoveConnection($map: Float!, $source: String!, $target: String!) {
-  removeConnection(map: $map, source: $source, target: $target) {
+    mutation RemoveConnection($source: String!, $target: String!) {
+  removeConnection(source: $source, target: $target) {
     id
   }
 }
@@ -685,8 +612,8 @@ export const RemoveConnectionDocument = gql`
     document = RemoveConnectionDocument;
     
   }
-export const DeleteConnectionByNodeDocument = gql`
-    mutation DeleteConnectionByNode($nodeId: String!) {
+export const RemoveConnectionByNodeDocument = gql`
+    mutation RemoveConnectionByNode($nodeId: String!) {
   removeConnectionsByNode(nodeId: $nodeId) {
     id
   }
@@ -696,8 +623,8 @@ export const DeleteConnectionByNodeDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class DeleteConnectionByNodeGQL extends Apollo.Mutation<DeleteConnectionByNodeMutation, DeleteConnectionByNodeMutationVariables> {
-    document = DeleteConnectionByNodeDocument;
+  export class RemoveConnectionByNodeGQL extends Apollo.Mutation<RemoveConnectionByNodeMutation, RemoveConnectionByNodeMutationVariables> {
+    document = RemoveConnectionByNodeDocument;
     
   }
 export const MoveNodeDocument = gql`

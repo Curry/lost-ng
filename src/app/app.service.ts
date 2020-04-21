@@ -1,62 +1,48 @@
 import { Injectable } from '@angular/core';
 import {
-  NodesGQL,
   Node,
-  ConnectionsGQL,
   Connection,
+  NodesGQL,
+  ConnectionsGQL,
   MoveNodeGQL,
   AddConnectionGQL,
   AddNodeGQL,
-  DeleteNodeGQL,
+  RemoveNodeGQL,
   RemoveConnectionGQL,
-  DeleteConnectionByNodeGQL,
+  RemoveConnectionByNodeGQL,
   WatchGQL,
 } from './graphql';
 import { map, mergeMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppService {
-  private readonly POLL_RATE = 1000;
-
   constructor(
     private nodes: NodesGQL,
     private connections: ConnectionsGQL,
     private move: MoveNodeGQL,
     private addConnection: AddConnectionGQL,
     private addNode: AddNodeGQL,
-    private deleteNode: DeleteNodeGQL,
-    private deleteConnectionByNode: DeleteConnectionByNodeGQL,
+    private deleteNode: RemoveNodeGQL,
+    private deleteConnectionByNode: RemoveConnectionByNodeGQL,
     private deleteConnection: RemoveConnectionGQL,
     private watch: WatchGQL
   ) {}
 
-  getNodes = () => {
-    // const queryRef = this.nodes.watch({ map: 1 });
-    // queryRef.startPolling(this.POLL_RATE);
-    // return queryRef.valueChanges.pipe(map((val) => val.data.nodes as Node[]));
-    return this.nodes
-      .fetch({ map: 1 })
-      .pipe(map((val) => val.data.nodes as Node[]));
-  }
+  getNodes = () =>
+    this.nodes.fetch({ map: 1 }).pipe(map((val) => val.data.nodes as Node[]))
 
-  createNode = (mapId: number, system: number) => {
-    console.log('here');
-    return this.addNode
+  createNode = (mapId: number, system: number) =>
+    this.addNode
       .mutate({ map: mapId, system })
-      .pipe(map((val) => val.data.addNode));
-  }
+      .pipe(map((val) => val.data.addNode))
 
-  moveNode = (id: string, posX: number, posY: number) => {
-    return this.move
-      .mutate({ id, posX, posY })
-      .pipe(map((val) => val.data.moveNode));
-  }
+  moveNode = (id: string, posX: number, posY: number) =>
+    this.move.mutate({ id, posX, posY }).pipe(map((val) => val.data.moveNode))
 
-  removeNode = (systemId: number) => {
-    return this.deleteNode.mutate({ systemId }).pipe(
+  removeNode = (systemId: number) =>
+    this.deleteNode.mutate({ systemId }).pipe(
       map((val) => val.data.deleteNodeBySystem),
       mergeMap(
         (val) => this.removeConnectionByNode(val.id),
@@ -65,48 +51,38 @@ export class AppService {
           connections: (val2 || []).map((conn) => conn.id),
         })
       )
-    );
-  }
+    )
 
-  removeConnectionByNode = (nodeId: string) => {
-    return this.deleteConnectionByNode
+  removeConnectionByNode = (nodeId: string) =>
+    this.deleteConnectionByNode
       .mutate({ nodeId })
-      .pipe(map((val) => val.data.removeConnectionsByNode));
-  }
+      .pipe(map((val) => val.data.removeConnectionsByNode))
 
-  getConnections = () => {
-    // const queryRef = this.connections.watch({ map: 1 });
-    // queryRef.startPolling(this.POLL_RATE);
-    // return queryRef.valueChanges.pipe(
-    //   map((val) => val.data.connections as Connection[])
-    // );
-    return this.connections
+  getConnections = () =>
+    this.connections
       .fetch({ map: 1 })
-      .pipe(map((val) => val.data.connections as Connection[]));
-  }
+      .pipe(map((val) => val.data.connections as Connection[]))
 
-  createConnection = (mapId: number, source: string, target: string) => {
-    return this.addConnection
+  createConnection = (mapId: number, source: string, target: string) =>
+    this.addConnection
       .mutate({
         map: mapId,
         source,
         target,
       })
-      .pipe(map((val) => val.data.addConnection as Connection));
-  }
+      .pipe(map((val) => val.data.addConnection as Connection))
 
-  removeConnection = (source: string, target: string) => {
-    return this.deleteConnection
-      .mutate({ map: 1, source, target })
-      .pipe(map((val) => val.data.removeConnection));
-  }
+  removeConnection = (source: string, target: string) =>
+    this.deleteConnection
+      .mutate({ source, target })
+      .pipe(map((val) => val.data.removeConnection))
 
   watchMap = (mapId: number) =>
     this.watch.subscribe({ mapId }).pipe(
       map((val) => ({
         type: val.data.subscribe.type,
         node: val.data.subscribe.node,
-        connection: val.data.subscribe.connection
+        connection: val.data.subscribe.connection,
       }))
     )
 }

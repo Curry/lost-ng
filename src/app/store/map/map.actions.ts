@@ -6,11 +6,6 @@ export namespace NodeActions {
     constructor(public mapId: number, public systemId: number) {}
   }
 
-  export class Create {
-    static readonly type = '[Node] Create Node';
-    constructor(public node: Node) {}
-  }
-
   export class Load {
     static readonly type = '[Node] Load Nodes';
   }
@@ -20,8 +15,8 @@ export namespace NodeActions {
     constructor(public id: string, public posX: number, public posY: number) {}
   }
 
-  export class Remove {
-    static readonly type = '[Node] Remove Node';
+  export class Delete {
+    static readonly type = '[Node] Delete Node';
     constructor(public systemId: number) {}
   }
 }
@@ -36,14 +31,36 @@ export namespace ConnectionActions {
     constructor(public source: string, public target: string) {}
   }
 
-  export class Create {
-    static readonly type = '[Connection] Create Connection';
+  export class Delete {
+    static readonly type = '[Connection] Delete Connection';
+    constructor(public source: string, public target: string) {}
+  }
+}
+
+export namespace SocketActions {
+  export class AddNode {
+    static readonly type = '[Socket] Add Node';
+    constructor(public node: Node) {}
+  }
+
+  export class AddConnection {
+    static readonly type = '[Socket] Add Connection';
     constructor(public connection: Connection) {}
   }
 
-  export class Remove {
-    static readonly type = '[Connection] Remove Connection';
-    constructor(public source: string, public target: string) {}
+  export class DeleteNode {
+    static readonly type = '[Socket] Delete Node';
+    constructor(public node: Node) {}
+  }
+
+  export class DeleteConnection {
+    static readonly type = '[Socket] Delete Connection';
+    constructor(public connection: Connection) {}
+  }
+
+  export class MoveNode {
+    static readonly type = '[Socket] Move Node';
+    constructor(public node: Node) {}
   }
 }
 
@@ -53,4 +70,8 @@ export class Undo {
 
 export class Redo {
   static readonly type = 'Redo';
+}
+
+export class Watch {
+  static readonly type = 'Watch';
 }

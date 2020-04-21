@@ -6,9 +6,7 @@ import { jsPlumbInstance } from 'jsplumb';
 import { Store } from '@ngxs/store';
 import { Select } from '@ngxs/store';
 import { MapState } from './store/map/map.state';
-import { ConnectionActions, NodeActions, Undo, Redo } from './store/map/map.actions';
-import { NodeState } from './store/node/node.state';
-import { AppService } from './app.service';
+import { ConnectionActions, NodeActions, Undo, Redo, Watch } from './store/map/map.actions';
 
 @Component({
   selector: 'app-root',
@@ -34,9 +32,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private store: Store,
-    private service: NodeService,
-    private appService: AppService,
-    private state: NodeState,
+    private service: NodeService
   ) {
     this.jsPlumbInstance = this.service.jsPlumbInstance;
   }
@@ -44,6 +40,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.store.dispatch(new NodeActions.Load());
     this.store.dispatch(new ConnectionActions.Load());
+    this.store.dispatch(new Watch());
     this.service.jsPlumbInstance.bind('connection', (info, event) => {
       if (event) {
         this.store.dispatch(new ConnectionActions.Add(info.sourceId, info.targetId));
@@ -51,12 +48,8 @@ export class AppComponent implements OnInit {
     });
     this.service.jsPlumbInstance.bind('connectionDetached', (info, event) => {
       if (event) {
-        this.store.dispatch(new ConnectionActions.Remove(info.sourceId, info.targetId));
+        this.store.dispatch(new ConnectionActions.Delete(info.sourceId, info.targetId));
       }
-    });
-    this.appService.watchMap(1).subscribe(val => {
-      console.log(val);
-      this.store.dispatch(val);
     });
   }
 
@@ -65,7 +58,7 @@ export class AppComponent implements OnInit {
   }
 
   deleteNode() {
-    this.store.dispatch(new NodeActions.Remove(31000060));
+    this.store.dispatch(new NodeActions.Delete(31000060));
   }
 
   undo() {
