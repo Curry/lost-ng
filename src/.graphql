@@ -116,6 +116,7 @@ subscription Watch($mapId: Float!) {
       alias
       posX
       posY
+      systemId
       system {
         id
         regionId

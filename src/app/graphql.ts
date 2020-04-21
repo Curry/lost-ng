@@ -447,7 +447,7 @@ export type WatchSubscription = (
     & Pick<StateChange, 'type'>
     & { node?: Maybe<(
       { __typename?: 'Node' }
-      & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY'>
+      & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
       & { system: (
         { __typename?: 'System' }
         & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
@@ -654,6 +654,7 @@ export const WatchDocument = gql`
       alias
       posX
       posY
+      systemId
       system {
         id
         regionId

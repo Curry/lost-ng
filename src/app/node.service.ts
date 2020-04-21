@@ -3,7 +3,6 @@ import {
   Injectable,
   ViewContainerRef,
   ComponentRef,
-  ViewRef,
 } from '@angular/core';
 import { jsPlumb } from 'jsplumb';
 import { NodeComponent } from './node/node.component';
@@ -21,20 +20,20 @@ export class NodeService {
 
   constructor(private factoryResolver: ComponentFactoryResolver) {}
 
-  setRootViewContainerRef = (viewContainerRef: ViewContainerRef) => {
+  setRootViewContainerRef = (viewContainerRef: ViewContainerRef): void => {
     this.rootViewContainer = viewContainerRef;
   };
 
-  resetConnections = () => this.jsPlumbInstance.deleteEveryConnection();
+  resetConnections = (): void => this.jsPlumbInstance.deleteEveryConnection();
 
-  addNodes = (nodes: Node[]) => {
+  addNodes = (nodes: Node[]): void => {
     nodes.forEach((node) => {
       this.addNode(node);
       // this.jsPlumbInstance.revalidate(node.id);
     });
   };
 
-  addNode = (node: Node) => {
+  addNode = (node: Node): void => {
     if (this.components[node.id]) {
       this.components[node.id].instance.node = node;
     } else {
@@ -52,26 +51,27 @@ export class NodeService {
     }
   };
 
-  removeNodes = (nodes: Node[]) => {
+  removeNodes = (nodes: Node[]): void => {
     nodes.forEach((node) => {
       this.components[node.id].destroy();
       delete this.components[node.id];
     });
   };
 
-  revalidate = (nodes: Node[]) => {
+  revalidate = (nodes: Node[]): void => {
     nodes.forEach((node) => this.jsPlumbInstance.revalidate(node.id));
   };
 
-  addConnections = (connections: Connection[]) => {
+  addConnections = (connections: Connection[]): void => {
     connections.forEach((connection) => this.addConnection(connection));
   };
 
-  addConnection(connection: Connection) {
+  addConnection = (connection: Connection): void => {
     if (
       this.jsPlumbInstance.select({
         source: connection.source,
         target: connection.target,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
       }).length === 0
     ) {
@@ -79,18 +79,18 @@ export class NodeService {
         uuids: [connection.source + '_bottom', connection.target + '_top'],
       });
     }
-  }
+  };
 
-  removeConnections = (connections: Connection[]) => {
+  removeConnections = (connections: Connection[]): void => {
     connections.forEach((connection) => this.removeConnection(connection));
   };
 
-  removeConnection(connection: Connection) {
+  removeConnection = (connection: Connection): void => {
     this.jsPlumbInstance
       .select({
         source: connection.source,
         target: connection.target,
       })
       .each((conn) => this.jsPlumbInstance.deleteConnection(conn));
-  }
+  };
 }

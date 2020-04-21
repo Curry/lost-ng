@@ -6,13 +6,15 @@ import { split } from 'apollo-link';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
 import { OperationDefinitionNode } from 'graphql';
+import { ApolloClientOptions } from 'apollo-client';
 
 @NgModule({
   exports: [ApolloModule, HttpLinkModule],
   providers: [
     {
       provide: APOLLO_OPTIONS,
-      useFactory: (httpLink: HttpLink) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      useFactory: (httpLink: HttpLink): ApolloClientOptions<any> => {
         return {
           cache: new InMemoryCache(),
           link: split(

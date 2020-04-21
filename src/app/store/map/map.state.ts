@@ -15,6 +15,7 @@ import {
   Draft,
 } from 'immer';
 import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 export interface MapEntityModel {
   nodes: { [id: string]: Node };
@@ -51,27 +52,27 @@ export class MapState {
   }
 
   @Selector()
-  static nodes(state: MapEntityModel) {
+  static nodes(state: MapEntityModel): Node[] {
     return Object.values(state.nodes);
   }
 
   @Selector()
-  static connections(state: MapEntityModel) {
+  static connections(state: MapEntityModel): Connection[] {
     return Object.values(state.connections);
   }
 
   @Selector()
-  static undoDisabled(state: MapEntityModel) {
+  static undoDisabled(state: MapEntityModel): boolean {
     return state.history.undoable.length === 0;
   }
 
   @Selector()
-  static redoDisabled(state: MapEntityModel) {
+  static redoDisabled(state: MapEntityModel): boolean {
     return state.history.undone.length === 0;
   }
 
   @Action(NodeActions.Load)
-  loadNodes(ctx: StateContext<MapEntityModel>) {
+  loadNodes(ctx: StateContext<MapEntityModel>): Observable<Node[]> {
     return this.service.getNodes().pipe(
       tap((nodes) => {
         ctx.setState(
@@ -86,7 +87,7 @@ export class MapState {
   }
 
   @Action(ConnectionActions.Load)
-  loadConnections(ctx: StateContext<MapEntityModel>) {
+  loadConnections(ctx: StateContext<MapEntityModel>): Observable<Connection[]> {
     return this.service.getConnections().pipe(
       tap((connections) => {
         ctx.setState(
@@ -101,7 +102,10 @@ export class MapState {
   }
 
   @Action(NodeActions.Move)
-  moveNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Move) {
+  moveNode(
+    ctx: StateContext<MapEntityModel>,
+    action: NodeActions.Move
+  ): Observable<Partial<Node>> {
     this.ignoreSocket = true;
     return this.service.moveNode(action.id, action.posX, action.posY).pipe(
       tap((val) => {
@@ -118,7 +122,7 @@ export class MapState {
   socketMoveNode(
     ctx: StateContext<MapEntityModel>,
     { node: { id, posX, posY } }: SocketActions.MoveNode
-  ) {
+  ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
         draft.nodes[id].posX = posX;
@@ -128,7 +132,10 @@ export class MapState {
   }
 
   @Action(NodeActions.Add)
-  addNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Add) {
+  addNode(
+    ctx: StateContext<MapEntityModel>,
+    action: NodeActions.Add
+  ): Observable<Node> {
     this.ignoreSocket = true;
     return this.service.createNode(action.mapId, action.systemId).pipe(
       tap((node) => {
@@ -146,7 +153,7 @@ export class MapState {
   socketAddNode(
     ctx: StateContext<MapEntityModel>,
     action: SocketActions.AddNode
-  ) {
+  ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
         if (!draft.nodes[action.node.id]) {
@@ -160,7 +167,7 @@ export class MapState {
   addConnection(
     ctx: StateContext<MapEntityModel>,
     action: ConnectionActions.Add
-  ) {
+  ): Observable<Connection> {
     this.ignoreSocket = true;
     return this.service.createConnection(1, action.source, action.target).pipe(
       tap((connection) => {
@@ -178,7 +185,7 @@ export class MapState {
   socketAddConnection(
     ctx: StateContext<MapEntityModel>,
     action: SocketActions.AddConnection
-  ) {
+  ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
         if (!draft.connections[action.connection.id]) {
@@ -189,7 +196,10 @@ export class MapState {
   }
 
   @Action(NodeActions.Delete)
-  deleteNode(ctx: StateContext<MapEntityModel>, action: NodeActions.Delete) {
+  deleteNode(
+    ctx: StateContext<MapEntityModel>,
+    action: NodeActions.Delete
+  ): Observable<{ node: string; connections: string[] }> {
     this.ignoreSocket = true;
     return this.service.removeNode(action.systemId).pipe(
       tap(({ node, connections }) => {
@@ -208,7 +218,7 @@ export class MapState {
   socketDeleteNode(
     ctx: StateContext<MapEntityModel>,
     action: SocketActions.DeleteNode
-  ) {
+  ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
         delete draft.nodes[action.node.id];
@@ -220,7 +230,7 @@ export class MapState {
   deleteConnection(
     ctx: StateContext<MapEntityModel>,
     action: ConnectionActions.Delete
-  ) {
+  ): Observable<{ id: string }> {
     this.ignoreSocket = true;
     return this.service.removeConnection(action.source, action.target).pipe(
       tap((val) => {
@@ -236,7 +246,7 @@ export class MapState {
   socketDeleteConnection(
     ctx: StateContext<MapEntityModel>,
     action: SocketActions.DeleteConnection
-  ) {
+  ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
         delete draft.connections[action.connection.id];
@@ -245,7 +255,9 @@ export class MapState {
   }
 
   @Action(MapActions.Watch)
-  watch(ctx: StateContext<MapEntityModel>) {
+  watch(
+    ctx: StateContext<MapEntityModel>
+  ): Observable<{ type: string; node?: Node; connection?: Connection }> {
     return this.service.watchMap(1).pipe(
       tap((val) => {
         if (!this.ignoreSocket) {
@@ -256,7 +268,7 @@ export class MapState {
   }
 
   @Action(MapActions.Undo)
-  undo(ctx: StateContext<MapEntityModel>) {
+  undo(ctx: StateContext<MapEntityModel>): void {
     if (ctx.getState().history.undoable.length > 0) {
       ctx.setState((state) =>
         applyPatches(
@@ -270,7 +282,7 @@ export class MapState {
   }
 
   @Action(MapActions.Redo)
-  redo(ctx: StateContext<MapEntityModel>) {
+  redo(ctx: StateContext<MapEntityModel>): void {
     if (ctx.getState().history.undone.length > 0) {
       ctx.setState((state) =>
         applyPatches(

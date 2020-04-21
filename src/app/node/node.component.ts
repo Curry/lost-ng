@@ -20,7 +20,7 @@ export class NodeComponent implements AfterViewInit {
 
   constructor(private store: Store) {}
 
-  createEndpoints = () => {
+  createEndpoints = (): void => {
     const exampleDropOptions = {
       tolerance: 'touch',
       hoverClass: 'dropHover',
@@ -63,11 +63,11 @@ export class NodeComponent implements AfterViewInit {
     );
   };
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     const { id } = this.node;
     this.createEndpoints();
     this.jsPlumbInstance.draggable(id, {
-      start: (val) => {
+      start: () => {
         this.clickable = false;
       },
       stop: (val) => {
@@ -79,7 +79,7 @@ export class NodeComponent implements AfterViewInit {
     });
   }
 
-  onClick = () => {
+  onClick = (): void => {
     console.log(this.clickable);
   };
 }

@@ -13,6 +13,7 @@ import {
   WatchGQL,
 } from './graphql';
 import { map, mergeMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -30,18 +31,24 @@ export class AppService {
     private watch: WatchGQL
   ) {}
 
-  getNodes = () =>
+  getNodes = (): Observable<Node[]> =>
     this.nodes.fetch({ map: 1 }).pipe(map((val) => val.data.nodes as Node[]));
 
-  createNode = (mapId: number, system: number) =>
+  createNode = (mapId: number, system: number): Observable<Node> =>
     this.addNode
       .mutate({ map: mapId, system })
       .pipe(map((val) => val.data.addNode));
 
-  moveNode = (id: string, posX: number, posY: number) =>
+  moveNode = (
+    id: string,
+    posX: number,
+    posY: number
+  ): Observable<Partial<Node>> =>
     this.move.mutate({ id, posX, posY }).pipe(map((val) => val.data.moveNode));
 
-  removeNode = (systemId: number) =>
+  removeNode = (
+    systemId: number
+  ): Observable<{ node: string; connections: string[] }> =>
     this.deleteNode.mutate({ systemId }).pipe(
       map((val) => val.data.deleteNodeBySystem),
       mergeMap(
@@ -53,17 +60,21 @@ export class AppService {
       )
     );
 
-  removeConnectionByNode = (nodeId: string) =>
+  removeConnectionByNode = (nodeId: string): Observable<{ id: string }[]> =>
     this.deleteConnectionByNode
       .mutate({ nodeId })
       .pipe(map((val) => val.data.removeConnectionsByNode));
 
-  getConnections = () =>
+  getConnections = (): Observable<Connection[]> =>
     this.connections
       .fetch({ map: 1 })
       .pipe(map((val) => val.data.connections as Connection[]));
 
-  createConnection = (mapId: number, source: string, target: string) =>
+  createConnection = (
+    mapId: number,
+    source: string,
+    target: string
+  ): Observable<Connection> =>
     this.addConnection
       .mutate({
         map: mapId,
@@ -72,11 +83,16 @@ export class AppService {
       })
       .pipe(map((val) => val.data.addConnection as Connection));
 
-  removeConnection = (source: string, target: string) =>
+  removeConnection = (
+    source: string,
+    target: string
+  ): Observable<{ id: string }> =>
     this.deleteConnection
       .mutate({ source, target })
       .pipe(map((val) => val.data.removeConnection));
 
-  watchMap = (mapId: number) =>
+  watchMap = (
+    mapId: number
+  ): Observable<{ type: string; node?: Node; connection?: Connection }> =>
     this.watch.subscribe({ mapId }).pipe(map((val) => val.data.subscribe));
 }

@@ -13,8 +13,9 @@ module.exports = {
         project: './tsconfig.json',
       },
       plugins: ['@typescript-eslint', '@angular-eslint', 'prettier'],
-
       extends: [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
         'prettier',
         'prettier/@typescript-eslint',
       ],
@@ -193,6 +194,10 @@ module.exports = {
       files: ['*.component.html'],
       parser: '@angular-eslint/template-parser',
       plugins: ['@angular-eslint/template', 'prettier'],
+      extends: [
+        'prettier',
+        'prettier/@typescript-eslint',
+      ],
       rules: {
         "prettier/prettier": "error",
         // ORIGINAL tslint.json -> "template-banana-in-box": true,

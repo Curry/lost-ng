@@ -27,11 +27,11 @@ export class NodesContainerComponent implements OnInit, OnChanges {
 
   constructor(private nodeService: NodeService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.nodeService.setRootViewContainerRef(this.viewContainerRef);
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes.nodes) {
       const prev = changes.nodes.previousValue || [];
       this.nodeService.removeNodes(

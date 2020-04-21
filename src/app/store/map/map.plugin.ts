@@ -29,7 +29,8 @@ export class MapPlugin implements NgxsPlugin {
     enablePatches();
   }
 
-  handle(state, action, next) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handle(state, action, next): any {
     let newState = state;
     const actionType = getActionTypeFromInstance(action);
     switch (actionType) {
@@ -55,6 +56,7 @@ export class MapPlugin implements NgxsPlugin {
         return next(newState, action);
       default:
         return next(state, action).pipe(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           tap((actionState: any) => {
             if (
               actionType !== NodeActions.Load.type &&

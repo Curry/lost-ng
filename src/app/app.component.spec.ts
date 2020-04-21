@@ -16,6 +16,7 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
+  // eslint-disable-next-line prettier/prettier
   it('should have as title \'lost-ng\'', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;

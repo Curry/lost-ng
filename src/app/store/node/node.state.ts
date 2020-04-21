@@ -10,7 +10,7 @@ import { createEntityCollections } from '@ngxs-labs/data/utils';
 import { Node } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
 import { tap, map } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @StateRepository()
 @State({
@@ -24,12 +24,12 @@ export class NodeState extends NgxsDataEntityCollectionsRepository<Node> {
   }
 
   @Computed()
-  public get nodes$() {
+  public get nodes$(): Observable<Node[]> {
     return this.state$.pipe(map((val) => Object.values(val.entities)));
   }
 
   @DataAction()
-  public load() {
+  public load(): Observable<Node[]> {
     return this.service.getNodes().pipe(
       tap((val) => {
         this.setAll(val);

@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
-import { NgxsModule, NGXS_PLUGINS } from '@ngxs/store';
+import { NgxsModule } from '@ngxs/store';
 import { CommonModule } from '@angular/common';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsDataPluginModule } from '@ngxs-labs/data';
 import { environment as env } from '../../environments/environment';
 import { MapState } from './map/map.state';
 import { NodeState } from './node/node.state';
-import { MapPlugin } from './map/map.plugin';
 
 @NgModule({
   imports: [
