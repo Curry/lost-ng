@@ -1370,6 +1370,11 @@
     rxjs "6.5.4"
     webpack-sources "1.4.3"
 
+"@ngxs-labs/data@^3.0.0-rc.13":
+  version "3.0.0-rc.13"
+  resolved "https://registry.yarnpkg.com/@ngxs-labs/data/-/data-3.0.0-rc.13.tgz#395534241a6328208d28e5ca264e02cd7204cf72"
+  integrity sha512-4GVmmRGUTa7o1qn2gKNeHHQdXqoMfixswLC0bJ6hu/waEsKxQO4TlSlxvZ4FecCgb8UrkhGurVcf9hAO54yOoQ==
+
 "@ngxs/devtools-plugin@^3.6.2":
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/@ngxs/devtools-plugin/-/devtools-plugin-3.6.2.tgz#aa0a4835f90fb905951d7712dc3ce508cbc15a2c"

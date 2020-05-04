@@ -5,6 +5,7 @@ query Nodes($map: Float!) {
     alias
     posX
     posY
+    systemId
     system {
       id
       regionId
@@ -70,6 +71,18 @@ mutation AddNode($map: Float!, $system: Float!) {
   }
 }
 
+mutation SyncNode($node: NodeInput!) {
+  syncNode(node: $node) {
+    id
+  }
+}
+
+mutation SyncConnection($connection: ConnectionInput!) {
+  syncConnection(connection: $connection) {
+    id
+  }
+}
+
 mutation RemoveNode($systemId: Float!) {
   deleteNodeBySystem(systemId: $systemId) {
     id
@@ -96,6 +109,8 @@ mutation RemoveConnection($source: String!, $target: String!) {
 mutation RemoveConnectionByNode($nodeId: String!) {
   removeConnectionsByNode(nodeId: $nodeId) {
     id
+    source
+    target
   }
 }
 

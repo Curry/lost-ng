@@ -1,8 +1,6 @@
-<nodes-container #nodeContainer [nodes]="nodes$ | async" [connections]="connections$ | async"></nodes-container>
+<nodes-container #nodeContainer [nodes]="state.nodes$ | async" [connections]="state.connections$ | async"></nodes-container>
 <button mat-raised-button color="primary" (click)="addNode()">Create new node</button>
 <button mat-raised-button color="primary" (click)="deleteNode()">Delete node</button>
 
-<button mat-raised-button color="primary" [disabled]="undoDisabled$ | async" (click)="undo()">Undo</button>
-<button mat-raised-button color="primary" [disabled]="redoDisabled$ | async" (click)="redo()">Redo</button>
-<!-- <button mat-raised-button color="primary" (click)="connUndo()" [disabled]="!hasConnUndo()">Undo Connection</button>
-<button mat-raised-button color="primary" (click)="connRedo()" [disabled]="!hasConnRedo()">Redo Connection</button> -->
+<button mat-raised-button color="primary" [disabled]="history.undoDisabled$ | async" (click)="history.undo()">Undo</button>
+<button mat-raised-button color="primary" [disabled]="history.redoDisabled$ | async" (click)="history.redo()">Redo</button>

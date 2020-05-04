@@ -69,6 +69,15 @@ export type Connection = {
   updatedAt: Scalars['Date'];
 };
 
+export type ConnectionInput = {
+  id: Scalars['String'];
+  mapId: Scalars['Int'];
+  source: Scalars['String'];
+  target: Scalars['String'];
+  createdAt: Scalars['Date'];
+  updatedAt: Scalars['Date'];
+};
+
 export type Corporation = {
    __typename?: 'Corporation';
   corporationId: Scalars['Int'];
@@ -108,9 +117,11 @@ export type Mutation = {
    __typename?: 'Mutation';
   addCorporation: Corporation;
   addConnection: Connection;
+  syncConnection: Connection;
   removeConnection: Connection;
   removeConnectionsByNode?: Maybe<Array<Connection>>;
   addNode: Node;
+  syncNode: Node;
   moveNode: Node;
   deleteNode: Node;
   deleteNodeBySystem: Node;
@@ -129,6 +140,11 @@ export type MutationAddConnectionArgs = {
 };
 
 
+export type MutationSyncConnectionArgs = {
+  connection: ConnectionInput;
+};
+
+
 export type MutationRemoveConnectionArgs = {
   target: Scalars['String'];
   source: Scalars['String'];
@@ -143,6 +159,11 @@ export type MutationRemoveConnectionsByNodeArgs = {
 export type MutationAddNodeArgs = {
   system: Scalars['Float'];
   map: Scalars['Float'];
+};
+
+
+export type MutationSyncNodeArgs = {
+  node: NodeInput;
 };
 
 
@@ -171,6 +192,15 @@ export type Node = {
   posX: Scalars['Float'];
   posY: Scalars['Float'];
   system: System;
+};
+
+export type NodeInput = {
+  id: Scalars['String'];
+  mapId: Scalars['Float'];
+  systemId: Scalars['Float'];
+  alias?: Maybe<Scalars['String']>;
+  posX: Scalars['Float'];
+  posY: Scalars['Float'];
 };
 
 export type Query = {
@@ -318,7 +348,7 @@ export type NodesQuery = (
   { __typename?: 'Query' }
   & { nodes: Array<(
     { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY'>
+    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
     & { system: (
       { __typename?: 'System' }
       & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
@@ -362,6 +392,32 @@ export type AddNodeMutation = (
         & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
       )> }
     ) }
+  ) }
+);
+
+export type SyncNodeMutationVariables = {
+  node: NodeInput;
+};
+
+
+export type SyncNodeMutation = (
+  { __typename?: 'Mutation' }
+  & { syncNode: (
+    { __typename?: 'Node' }
+    & Pick<Node, 'id'>
+  ) }
+);
+
+export type SyncConnectionMutationVariables = {
+  connection: ConnectionInput;
+};
+
+
+export type SyncConnectionMutation = (
+  { __typename?: 'Mutation' }
+  & { syncConnection: (
+    { __typename?: 'Connection' }
+    & Pick<Connection, 'id'>
   ) }
 );
 
@@ -416,7 +472,7 @@ export type RemoveConnectionByNodeMutation = (
   { __typename?: 'Mutation' }
   & { removeConnectionsByNode?: Maybe<Array<(
     { __typename?: 'Connection' }
-    & Pick<Connection, 'id'>
+    & Pick<Connection, 'id' | 'source' | 'target'>
   )>> }
 );
 
@@ -471,6 +527,7 @@ export const NodesDocument = gql`
     alias
     posX
     posY
+    systemId
     system {
       id
       regionId
@@ -562,6 +619,36 @@ export const AddNodeDocument = gql`
     document = AddNodeDocument;
     
   }
+export const SyncNodeDocument = gql`
+    mutation SyncNode($node: NodeInput!) {
+  syncNode(node: $node) {
+    id
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class SyncNodeGQL extends Apollo.Mutation<SyncNodeMutation, SyncNodeMutationVariables> {
+    document = SyncNodeDocument;
+    
+  }
+export const SyncConnectionDocument = gql`
+    mutation SyncConnection($connection: ConnectionInput!) {
+  syncConnection(connection: $connection) {
+    id
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class SyncConnectionGQL extends Apollo.Mutation<SyncConnectionMutation, SyncConnectionMutationVariables> {
+    document = SyncConnectionDocument;
+    
+  }
 export const RemoveNodeDocument = gql`
     mutation RemoveNode($systemId: Float!) {
   deleteNodeBySystem(systemId: $systemId) {
@@ -616,6 +703,8 @@ export const RemoveConnectionByNodeDocument = gql`
     mutation RemoveConnectionByNode($nodeId: String!) {
   removeConnectionsByNode(nodeId: $nodeId) {
     id
+    source
+    target
   }
 }
     `;

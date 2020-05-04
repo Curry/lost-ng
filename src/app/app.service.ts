@@ -11,9 +11,12 @@ import {
   RemoveConnectionGQL,
   RemoveConnectionByNodeGQL,
   WatchGQL,
+  SyncConnectionGQL,
+  SyncNodeGQL,
+  NodeInput,
 } from './graphql';
-import { map, mergeMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { map, mergeMap, pluck, combineAll } from 'rxjs/operators';
+import { Observable, of, forkJoin, from } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -28,47 +31,53 @@ export class AppService {
     private deleteNode: RemoveNodeGQL,
     private deleteConnectionByNode: RemoveConnectionByNodeGQL,
     private deleteConnection: RemoveConnectionGQL,
-    private watch: WatchGQL
+    private watch: WatchGQL,
+    private syncConn: SyncConnectionGQL,
+    private syncNode: SyncNodeGQL
   ) {}
 
+  getData = (): Observable<[Node[], Connection[]]> =>
+    forkJoin(this.getNodes(), this.getConnections());
+
   getNodes = (): Observable<Node[]> =>
-    this.nodes.fetch({ map: 1 }).pipe(map((val) => val.data.nodes as Node[]));
+    this.nodes.fetch({ map: 1 }).pipe(pluck('data', 'nodes'));
 
   createNode = (mapId: number, system: number): Observable<Node> =>
-    this.addNode
-      .mutate({ map: mapId, system })
-      .pipe(map((val) => val.data.addNode));
+    this.addNode.mutate({ map: mapId, system }).pipe(pluck('data', 'addNode'));
 
   moveNode = (
     id: string,
     posX: number,
     posY: number
   ): Observable<Partial<Node>> =>
-    this.move.mutate({ id, posX, posY }).pipe(map((val) => val.data.moveNode));
+    this.move.mutate({ id, posX, posY }).pipe(pluck('data', 'moveNode'));
 
   removeNode = (
     systemId: number
-  ): Observable<{ node: string; connections: string[] }> =>
+  ): Observable<{
+    node: string;
+    connections: { id: string; source: string; target: string }[];
+  }> =>
     this.deleteNode.mutate({ systemId }).pipe(
-      map((val) => val.data.deleteNodeBySystem),
+      pluck('data', 'deleteNodeBySystem'),
       mergeMap(
         (val) => this.removeConnectionByNode(val.id),
         (val1, val2) => ({
           node: val1.id,
-          connections: (val2 || []).map((conn) => conn.id),
+          connections: val2 || [],
         })
       )
     );
 
-  removeConnectionByNode = (nodeId: string): Observable<{ id: string }[]> =>
+  removeConnectionByNode = (
+    nodeId: string
+  ): Observable<{ id: string; source: string; target: string }[]> =>
     this.deleteConnectionByNode
       .mutate({ nodeId })
-      .pipe(map((val) => val.data.removeConnectionsByNode));
+      .pipe(pluck('data', 'removeConnectionsByNode'));
 
   getConnections = (): Observable<Connection[]> =>
-    this.connections
-      .fetch({ map: 1 })
-      .pipe(map((val) => val.data.connections as Connection[]));
+    this.connections.fetch({ map: 1 }).pipe(pluck('data', 'connections'));
 
   createConnection = (
     mapId: number,
@@ -81,7 +90,7 @@ export class AppService {
         source,
         target,
       })
-      .pipe(map((val) => val.data.addConnection as Connection));
+      .pipe(pluck('data', 'addConnection'));
 
   removeConnection = (
     source: string,
@@ -89,10 +98,33 @@ export class AppService {
   ): Observable<{ id: string }> =>
     this.deleteConnection
       .mutate({ source, target })
-      .pipe(map((val) => val.data.removeConnection));
+      .pipe(pluck('data', 'removeConnection'));
 
   watchMap = (
     mapId: number
   ): Observable<{ type: string; node?: Node; connection?: Connection }> =>
-    this.watch.subscribe({ mapId }).pipe(map((val) => val.data.subscribe));
+    this.watch.subscribe({ mapId }).pipe(pluck('data', 'subscribe'));
+
+  syncChanges = (nodes: Node[], connections: Connection[]) => {
+    return forkJoin(
+      from(nodes).pipe(
+        map((node) =>
+          this.syncNode
+            .mutate({ node: (({ __typename, system, ...rest }) => rest)(node) })
+            .pipe(pluck('data', 'syncNode'))
+        ),
+        combineAll()
+      ),
+      from(connections).pipe(
+        map((connection) =>
+          this.syncConn
+            .mutate({
+              connection: (({ __typename, ...rest }) => rest)(connection),
+            })
+            .pipe(pluck('data', 'syncConnection'))
+        ),
+        combineAll()
+      )
+    );
+  };
 }

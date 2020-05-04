@@ -1,6 +1,6 @@
 export class Add {
-  static readonly type = '[Node] Add Node';
-  readonly type = '[Node] Add Node';
+  static readonly type = '[NodeEntity] Add Node';
+  readonly type = '[NodeEntity] Add Node';
   constructor(
     public mapId: number,
     public systemId: number,
@@ -9,8 +9,8 @@ export class Add {
 }
 
 export class Move {
-  static readonly type = '[Node] Move Node';
-  readonly type = '[Node] Move Node';
+  static readonly type = '[NodeEntity] Move Node';
+  readonly type = '[NodeEntity] Move Node';
   constructor(
     public id: string,
     public posX: number,
@@ -20,7 +20,7 @@ export class Move {
 }
 
 export class Delete {
-  static readonly type = '[Node] Delete Node';
-  readonly type = '[Node] Delete Node';
+  static readonly type = '[NodeEntity] Delete Node';
+  readonly type = '[NodeEntity] Delete Node';
   constructor(public systemId: number, public skipHistory = false) {}
 }

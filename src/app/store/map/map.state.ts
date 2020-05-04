@@ -1,113 +1,97 @@
 import { Injectable } from '@angular/core';
-import { State, Action, StateContext, Selector } from '@ngxs/store';
+import { State, Action, StateContext } from '@ngxs/store';
 import { Node, Connection } from 'src/app/graphql';
 import { AppService } from 'src/app/app.service';
 import * as MapActions from './map.actions';
 import * as NodeActions from './node.actions';
 import * as ConnectionActions from './connection.actions';
 import * as SocketActions from './socket.actions';
+import * as HistoryActions from '../history/history.actions';
+
+import { produce, produceWithPatches, Draft, applyPatches, Patch } from 'immer';
+import { tap, switchMap, mergeMap, map, catchError } from 'rxjs/operators';
+import { Observable, timer, BehaviorSubject, never, forkJoin, of } from 'rxjs';
 import {
-  produce,
-  Patch,
-  enablePatches,
-  applyPatches,
-  produceWithPatches,
-  Draft,
-} from 'immer';
-import { tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+  StateRepository,
+  Computed,
+  DataAction,
+} from '@ngxs-labs/data/decorators';
+import { NgxsDataRepository } from '@ngxs-labs/data/repositories';
 
 export interface MapEntityModel {
   nodes: { [id: string]: Node };
   connections: { [id: string]: Connection };
-  history: History;
 }
 
-interface Patches {
-  patches: Patch[];
-  inversePatches: Patch[];
-}
-
-interface History {
-  undone: Patches[];
-  undoable: Patches[];
-}
-
+@StateRepository()
 @State<MapEntityModel>({
   name: 'map',
   defaults: {
     nodes: {},
     connections: {},
-    history: {
-      undone: [],
-      undoable: [],
-    },
   },
 })
 @Injectable()
-export class MapState {
+export class MapState extends NgxsDataRepository<MapEntityModel> {
   private ignoreSocket = false;
+  private syncChanges$: BehaviorSubject<boolean>;
+
   constructor(private service: AppService) {
-    enablePatches();
+    super();
+    this.syncChanges$ = new BehaviorSubject(false);
+    this.syncChanges$
+      .pipe(
+        switchMap((e) => (!!e ? timer(2500) : never())),
+        mergeMap(() =>
+          this.service.syncChanges(
+            Object.values(this.getState().nodes),
+            Object.values(this.getState().connections)
+          )
+        )
+      )
+      .subscribe(() => console.log('val'));
   }
 
-  @Selector()
-  static nodes(state: MapEntityModel): Node[] {
-    return Object.values(state.nodes);
+  @Computed()
+  public get nodes$(): Observable<Node[]> {
+    return this.state$.pipe(map((state) => Object.values(state.nodes)));
   }
 
-  @Selector()
-  static connections(state: MapEntityModel): Connection[] {
-    return Object.values(state.connections);
+  @Computed()
+  public get connections$(): Observable<Connection[]> {
+    return this.state$.pipe(map((state) => Object.values(state.connections)));
   }
 
-  @Selector()
-  static undoDisabled(state: MapEntityModel): boolean {
-    return state.history.undoable.length === 0;
-  }
-
-  @Selector()
-  static redoDisabled(state: MapEntityModel): boolean {
-    return state.history.undone.length === 0;
-  }
-
-  @Action(NodeActions.Load)
-  loadNodes(ctx: StateContext<MapEntityModel>): Observable<Node[]> {
-    return this.service.getNodes().pipe(
-      tap((nodes) => {
+  @Action(MapActions.Load)
+  load(ctx: StateContext<MapEntityModel>): Observable<boolean> {
+    return forkJoin(
+      this.service.getNodes(),
+      this.service.getConnections()
+    ).pipe(
+      map(([nodes, connections]) => {
         ctx.setState(
           produce((draft: MapEntityModel) => {
             nodes.forEach((node) => {
               draft.nodes[node.id] = node;
             });
-          })
-        );
-      })
-    );
-  }
-
-  @Action(ConnectionActions.Load)
-  loadConnections(ctx: StateContext<MapEntityModel>): Observable<Connection[]> {
-    return this.service.getConnections().pipe(
-      tap((connections) => {
-        ctx.setState(
-          produce((draft: MapEntityModel) => {
             connections.forEach((conn) => {
               draft.connections[conn.id] = conn;
             });
           })
         );
-      })
+        return true;
+      }),
+      catchError(() => of(false))
     );
   }
 
   @Action(NodeActions.Move)
   moveNode(
     ctx: StateContext<MapEntityModel>,
-    action: NodeActions.Move
+    { id, posX, posY }: NodeActions.Move
   ): Observable<Partial<Node>> {
     this.ignoreSocket = true;
-    return this.service.moveNode(action.id, action.posX, action.posY).pipe(
+    return this.service.moveNode(id, posX, posY).pipe(
       tap((val) => {
         this.changeState(ctx, (draft) => {
           draft.nodes[val.id].posX = val.posX;
@@ -199,14 +183,21 @@ export class MapState {
   deleteNode(
     ctx: StateContext<MapEntityModel>,
     action: NodeActions.Delete
-  ): Observable<{ node: string; connections: string[] }> {
+  ): Observable<{
+    node: string;
+    connections: {
+      id: string;
+      source: string;
+      target: string;
+    }[];
+  }> {
     this.ignoreSocket = true;
     return this.service.removeNode(action.systemId).pipe(
       tap(({ node, connections }) => {
         this.changeState(ctx, (draft) => {
           delete draft.nodes[node];
           connections.forEach((conn) => {
-            delete draft.connections[conn];
+            delete draft.connections[conn.id];
           });
         });
         this.ignoreSocket = false;
@@ -267,32 +258,10 @@ export class MapState {
     );
   }
 
-  @Action(MapActions.Undo)
-  undo(ctx: StateContext<MapEntityModel>): void {
-    if (ctx.getState().history.undoable.length > 0) {
-      ctx.setState((state) =>
-        applyPatches(
-          produce(state, (draft) => {
-            draft.history.undone.unshift(draft.history.undoable.shift());
-          }),
-          state.history.undoable[0].inversePatches
-        )
-      );
-    }
-  }
-
-  @Action(MapActions.Redo)
-  redo(ctx: StateContext<MapEntityModel>): void {
-    if (ctx.getState().history.undone.length > 0) {
-      ctx.setState((state) =>
-        applyPatches(
-          produce(state, (draft) => {
-            draft.history.undoable.unshift(draft.history.undone.shift());
-          }),
-          state.history.undone[0].patches
-        )
-      );
-    }
+  @DataAction()
+  update(patches: Patch[]): void {
+    this.ctx.setState(applyPatches(this.ctx.getState(), patches));
+    this.syncChanges$.next(true);
   }
 
   private changeState = (
@@ -303,11 +272,7 @@ export class MapState {
       ctx.getState(),
       produceFn
     );
-    ctx.setState(
-      produce(newState, (draft) => {
-        draft.history.undoable.unshift({ patches, inversePatches });
-        draft.history.undone = [];
-      })
-    );
+    ctx.setState(newState);
+    ctx.dispatch(new HistoryActions.Add(patches, inversePatches));
   };
 }
