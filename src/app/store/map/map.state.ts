@@ -9,7 +9,14 @@ import * as SocketActions from './socket.actions';
 import * as HistoryActions from '../history/history.actions';
 
 import { produce, produceWithPatches, Draft, applyPatches, Patch } from 'immer';
-import { tap, switchMap, mergeMap, map, catchError } from 'rxjs/operators';
+import {
+  tap,
+  switchMap,
+  mergeMap,
+  map,
+  catchError,
+  debounceTime,
+} from 'rxjs/operators';
 import { Observable, timer, BehaviorSubject, never, forkJoin, of } from 'rxjs';
 import {
   StateRepository,
@@ -41,7 +48,7 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
     this.syncChanges$ = new BehaviorSubject(false);
     this.syncChanges$
       .pipe(
-        switchMap((e) => (!!e ? timer(2500) : never())),
+        debounceTime(2500),
         mergeMap(() =>
           this.service.syncChanges(
             Object.values(this.getState().nodes),
