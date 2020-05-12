@@ -16,7 +16,6 @@ export type Scalars = {
 
 
 export type Alliance = {
-   __typename?: 'Alliance';
   allianceId: Scalars['Int'];
   allianceName: Scalars['String'];
   ticker: Scalars['String'];
@@ -25,7 +24,6 @@ export type Alliance = {
 };
 
 export type Character = {
-   __typename?: 'Character';
   id: Scalars['Int'];
   characterId: Scalars['Int'];
   lastLogin: Scalars['Date'];
@@ -60,7 +58,6 @@ export enum Class {
 }
 
 export type Connection = {
-   __typename?: 'Connection';
   id: Scalars['String'];
   mapId: Scalars['Int'];
   source: Scalars['String'];
@@ -79,7 +76,6 @@ export type ConnectionInput = {
 };
 
 export type Corporation = {
-   __typename?: 'Corporation';
   corporationId: Scalars['Int'];
   corporationName: Scalars['String'];
   ticker: Scalars['String'];
@@ -114,7 +110,6 @@ export enum Effect {
 }
 
 export type Mutation = {
-   __typename?: 'Mutation';
   addCorporation: Corporation;
   addConnection: Connection;
   syncConnection: Connection;
@@ -184,7 +179,6 @@ export type MutationDeleteNodeBySystemArgs = {
 };
 
 export type Node = {
-   __typename?: 'Node';
   id: Scalars['String'];
   mapId: Scalars['Float'];
   systemId: Scalars['Float'];
@@ -204,7 +198,6 @@ export type NodeInput = {
 };
 
 export type Query = {
-   __typename?: 'Query';
   helloWorld: Scalars['String'];
   hello: Scalars['String'];
   currentShip: Ship;
@@ -288,7 +281,6 @@ export type QueryNodesArgs = {
 };
 
 export type Ship = {
-   __typename?: 'Ship';
   id: Scalars['Int'];
   name: Scalars['String'];
   mass: Scalars['Float'];
@@ -296,14 +288,11 @@ export type Ship = {
 };
 
 export type StateChange = {
-   __typename?: 'StateChange';
   type: Scalars['String'];
-  node?: Maybe<Node>;
-  connection?: Maybe<Connection>;
+  props: Scalars['String'];
 };
 
 export type Subscription = {
-   __typename?: 'Subscription';
   subscribe: StateChange;
   corpChanged: Corporation;
 };
@@ -314,7 +303,6 @@ export type SubscriptionSubscribeArgs = {
 };
 
 export type System = {
-   __typename?: 'System';
   id: Scalars['Int'];
   constellationId?: Maybe<Scalars['Int']>;
   regionId?: Maybe<Scalars['Int']>;
@@ -327,7 +315,6 @@ export type System = {
 };
 
 export type Wormhole = {
-   __typename?: 'Wormhole';
   id: Scalars['Int'];
   name: Scalars['String'];
   sourceClasses: Array<Class>;
@@ -344,34 +331,20 @@ export type NodesQueryVariables = {
 };
 
 
-export type NodesQuery = (
-  { __typename?: 'Query' }
-  & { nodes: Array<(
-    { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
+export type NodesQuery = { nodes: Array<(
+    Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
     & { system: (
-      { __typename?: 'System' }
-      & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
-      & { statics: Array<(
-        { __typename?: 'Wormhole' }
-        & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
-      )> }
+      Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
+      & { statics: Array<Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>> }
     ) }
-  )> }
-);
+  )> };
 
 export type ConnectionsQueryVariables = {
   map: Scalars['Float'];
 };
 
 
-export type ConnectionsQuery = (
-  { __typename?: 'Query' }
-  & { connections: Array<(
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
-  )> }
-);
+export type ConnectionsQuery = { connections: Array<Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>> };
 
 export type AddNodeMutationVariables = {
   map: Scalars['Float'];
@@ -379,60 +352,34 @@ export type AddNodeMutationVariables = {
 };
 
 
-export type AddNodeMutation = (
-  { __typename?: 'Mutation' }
-  & { addNode: (
-    { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
+export type AddNodeMutation = { addNode: (
+    Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
     & { system: (
-      { __typename?: 'System' }
-      & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
-      & { statics: Array<(
-        { __typename?: 'Wormhole' }
-        & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
-      )> }
+      Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
+      & { statics: Array<Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>> }
     ) }
-  ) }
-);
+  ) };
 
 export type SyncNodeMutationVariables = {
   node: NodeInput;
 };
 
 
-export type SyncNodeMutation = (
-  { __typename?: 'Mutation' }
-  & { syncNode: (
-    { __typename?: 'Node' }
-    & Pick<Node, 'id'>
-  ) }
-);
+export type SyncNodeMutation = { syncNode: Pick<Node, 'id'> };
 
 export type SyncConnectionMutationVariables = {
   connection: ConnectionInput;
 };
 
 
-export type SyncConnectionMutation = (
-  { __typename?: 'Mutation' }
-  & { syncConnection: (
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id'>
-  ) }
-);
+export type SyncConnectionMutation = { syncConnection: Pick<Connection, 'id'> };
 
 export type RemoveNodeMutationVariables = {
   systemId: Scalars['Float'];
 };
 
 
-export type RemoveNodeMutation = (
-  { __typename?: 'Mutation' }
-  & { deleteNodeBySystem: (
-    { __typename?: 'Node' }
-    & Pick<Node, 'id'>
-  ) }
-);
+export type RemoveNodeMutation = { deleteNodeBySystem: Pick<Node, 'id'> };
 
 export type AddConnectionMutationVariables = {
   map: Scalars['Float'];
@@ -441,13 +388,7 @@ export type AddConnectionMutationVariables = {
 };
 
 
-export type AddConnectionMutation = (
-  { __typename?: 'Mutation' }
-  & { addConnection: (
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
-  ) }
-);
+export type AddConnectionMutation = { addConnection: Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'> };
 
 export type RemoveConnectionMutationVariables = {
   source: Scalars['String'];
@@ -455,26 +396,14 @@ export type RemoveConnectionMutationVariables = {
 };
 
 
-export type RemoveConnectionMutation = (
-  { __typename?: 'Mutation' }
-  & { removeConnection: (
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id'>
-  ) }
-);
+export type RemoveConnectionMutation = { removeConnection: Pick<Connection, 'id'> };
 
 export type RemoveConnectionByNodeMutationVariables = {
   nodeId: Scalars['String'];
 };
 
 
-export type RemoveConnectionByNodeMutation = (
-  { __typename?: 'Mutation' }
-  & { removeConnectionsByNode?: Maybe<Array<(
-    { __typename?: 'Connection' }
-    & Pick<Connection, 'id' | 'source' | 'target'>
-  )>> }
-);
+export type RemoveConnectionByNodeMutation = { removeConnectionsByNode?: Maybe<Array<Pick<Connection, 'id' | 'source' | 'target'>>> };
 
 export type MoveNodeMutationVariables = {
   id: Scalars['String'];
@@ -483,41 +412,14 @@ export type MoveNodeMutationVariables = {
 };
 
 
-export type MoveNodeMutation = (
-  { __typename?: 'Mutation' }
-  & { moveNode: (
-    { __typename?: 'Node' }
-    & Pick<Node, 'id' | 'posX' | 'posY'>
-  ) }
-);
+export type MoveNodeMutation = { moveNode: Pick<Node, 'id' | 'posX' | 'posY'> };
 
 export type WatchSubscriptionVariables = {
   mapId: Scalars['Float'];
 };
 
 
-export type WatchSubscription = (
-  { __typename?: 'Subscription' }
-  & { subscribe: (
-    { __typename?: 'StateChange' }
-    & Pick<StateChange, 'type'>
-    & { node?: Maybe<(
-      { __typename?: 'Node' }
-      & Pick<Node, 'id' | 'mapId' | 'alias' | 'posX' | 'posY' | 'systemId'>
-      & { system: (
-        { __typename?: 'System' }
-        & Pick<System, 'id' | 'regionId' | 'constellationId' | 'systemName' | 'class' | 'effect' | 'trueSec'>
-        & { statics: Array<(
-          { __typename?: 'Wormhole' }
-          & Pick<Wormhole, 'id' | 'name' | 'sourceClasses' | 'targetClass' | 'lifetime' | 'maxMass' | 'massRegen' | 'maxOnePass' | 'scanStrength'>
-        )> }
-      ) }
-    )>, connection?: Maybe<(
-      { __typename?: 'Connection' }
-      & Pick<Connection, 'id' | 'mapId' | 'source' | 'target' | 'createdAt' | 'updatedAt'>
-    )> }
-  ) }
-);
+export type WatchSubscription = { subscribe: Pick<StateChange, 'type' | 'props'> };
 
 export const NodesDocument = gql`
     query Nodes($map: Float!) {
@@ -737,42 +639,7 @@ export const WatchDocument = gql`
     subscription Watch($mapId: Float!) {
   subscribe(mapId: $mapId) {
     type
-    node {
-      id
-      mapId
-      alias
-      posX
-      posY
-      systemId
-      system {
-        id
-        regionId
-        constellationId
-        systemName
-        class
-        effect
-        trueSec
-        statics {
-          id
-          name
-          sourceClasses
-          targetClass
-          lifetime
-          maxMass
-          massRegen
-          maxOnePass
-          scanStrength
-        }
-      }
-    }
-    connection {
-      id
-      mapId
-      source
-      target
-      createdAt
-      updatedAt
-    }
+    props
   }
 }
     `;

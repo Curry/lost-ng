@@ -102,15 +102,21 @@ export class AppService {
 
   watchMap = (
     mapId: number
-  ): Observable<{ type: string; node?: Node; connection?: Connection }> =>
-    this.watch.subscribe({ mapId }).pipe(pluck('data', 'subscribe'));
+  ): Observable<{ type: string; props: Node | Connection }> =>
+    this.watch.subscribe({ mapId }).pipe(
+      pluck('data', 'subscribe'),
+      map(({ type, props }) => ({
+        type,
+        props: JSON.parse(props) as Node | Connection,
+      }))
+    );
 
   syncChanges = (nodes: Node[], connections: Connection[]) => {
     return forkJoin(
       from(nodes).pipe(
         map((node) =>
           this.syncNode
-            .mutate({ node: (({ __typename, system, ...rest }) => rest)(node) })
+            .mutate({ node: (({ system, ...rest }) => rest)(node) })
             .pipe(pluck('data', 'syncNode'))
         ),
         combineAll()
@@ -119,7 +125,7 @@ export class AppService {
         map((connection) =>
           this.syncConn
             .mutate({
-              connection: (({ __typename, ...rest }) => rest)(connection),
+              connection,
             })
             .pipe(pluck('data', 'syncConnection'))
         ),

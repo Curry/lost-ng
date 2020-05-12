@@ -112,7 +112,7 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
   @Action(SocketActions.MoveNode)
   socketMoveNode(
     ctx: StateContext<MapEntityModel>,
-    { node: { id, posX, posY } }: SocketActions.MoveNode
+    { props: { id, posX, posY } }: SocketActions.MoveNode
   ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
@@ -147,8 +147,8 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
   ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
-        if (!draft.nodes[action.node.id]) {
-          draft.nodes[action.node.id] = action.node;
+        if (!draft.nodes[action.props.id]) {
+          draft.nodes[action.props.id] = action.props;
         }
       })
     );
@@ -179,8 +179,8 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
   ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
-        if (!draft.connections[action.connection.id]) {
-          draft.connections[action.connection.id] = action.connection;
+        if (!draft.connections[action.props.id]) {
+          draft.connections[action.props.id] = action.props;
         }
       })
     );
@@ -219,7 +219,7 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
   ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
-        delete draft.nodes[action.node.id];
+        delete draft.nodes[action.props.id];
       })
     );
   }
@@ -247,7 +247,7 @@ export class MapState extends NgxsDataRepository<MapEntityModel> {
   ): void {
     ctx.setState((state) =>
       produce(state, (draft) => {
-        delete draft.connections[action.connection.id];
+        delete draft.connections[action.props.id];
       })
     );
   }

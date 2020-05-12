@@ -125,41 +125,6 @@ mutation MoveNode($id: String!, $posX: Float!, $posY: Float!) {
 subscription Watch($mapId: Float!) {
   subscribe(mapId: $mapId) {
     type
-    node {
-      id
-      mapId
-      alias
-      posX
-      posY
-      systemId
-      system {
-        id
-        regionId
-        constellationId
-        systemName
-        class
-        effect
-        trueSec
-        statics {
-          id
-          name
-          sourceClasses
-          targetClass
-          lifetime
-          maxMass
-          massRegen
-          maxOnePass
-          scanStrength
-        }
-      }
-    }
-    connection {
-      id
-      mapId
-      source
-      target
-      createdAt
-      updatedAt
-    }
+    props
   }
 }

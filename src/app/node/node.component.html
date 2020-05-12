@@ -1,3 +1,7 @@
 <mat-card class="node" id="{{node.id}}" [style.top.px]="node.posY" [style.left.px]="node.posX" (click)="onClick()">
-  <mat-card-title>{{node.alias || node.system.systemName}}</mat-card-title>
+  <mat-card-subtitle>{{node.alias || node.system.systemName}}</mat-card-subtitle>
+  <div fxLayout='row' fxFlex>
+    <mat-card-content>Stuff</mat-card-content>
+    <mat-card-content>Stuff</mat-card-content>
+  </div>
 </mat-card>
