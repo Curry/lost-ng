@@ -82,4 +82,12 @@ export class NodeComponent implements AfterViewInit {
   onClick = (): void => {
     console.log(this.clickable);
   };
+
+  onEnter(e) {
+    console.log(e);
+  }
+
+  log(t)  {
+    console.log(t);
+  }
 }

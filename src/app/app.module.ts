@@ -7,9 +7,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { NodeComponent } from './node/node.component';
 import { NodesContainerComponent } from './nodes-container/nodes-container.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxsStoreModule } from './store/store.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   imports: [
@@ -21,6 +23,8 @@ import { NgxsStoreModule } from './store/store.module';
     MatButtonModule,
     MatCardModule,
     NgxsStoreModule,
+    FlexLayoutModule,
+    NgbModule,
   ],
   declarations: [AppComponent, NodeComponent, NodesContainerComponent],
   entryComponents: [NodeComponent],

@@ -1,7 +1,12 @@
+<ng-template #popContent let-statics='statics'>
+  <div *ngFor='let stat of statics'></div>
+</ng-template>
+
 <mat-card class="node" id="{{node.id}}" [style.top.px]="node.posY" [style.left.px]="node.posX" (click)="onClick()">
   <mat-card-subtitle>{{node.alias || node.system.systemName}}</mat-card-subtitle>
-  <div fxLayout='row' fxFlex>
-    <mat-card-content>Stuff</mat-card-content>
-    <mat-card-content>Stuff</mat-card-content>
-  </div>
+  <mat-card-content>
+    <div fxLayout='row'>
+      <div *ngFor='let stats of node.system.statics' fxFlex [ngbPopover]="popContent" triggers="mouseenter:mouseleave" [popoverTitle]="stats.name">{{stats.targetClass}}</div>
+    </div>
+  </mat-card-content>
 </mat-card>
